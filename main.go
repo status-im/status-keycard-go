@@ -11,10 +11,11 @@ import (
 var kctx *keycardContext
 
 func main() {
-	example()
+	// example()
 }
 
 func example() {
+	fmt.Printf("RUNNING EXAMPLE \n")
 	res := Start()
 	fmt.Printf("*** start %+v\n", C.GoString(res))
 	time.Sleep(2)
