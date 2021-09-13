@@ -181,7 +181,6 @@ func (kc *keycardContext) pair(pairingPassword string) (*types.PairingInfo, erro
 		return nil, err
 	}
 
-	fmt.Printf("PAIRING KEY %x\n", kc.cmdSet.PairingInfo.Key)
 	return kc.cmdSet.PairingInfo, nil
 }
 
