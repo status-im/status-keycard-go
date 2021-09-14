@@ -38,3 +38,62 @@ type openSecureChannelParams struct {
 type verifyPinParams struct {
 	Pin string `json:"pin"`
 }
+
+type deriveKeyParams struct {
+	Path string `json:"path"`
+}
+
+type signWithPathParams struct {
+	Data hexString `json:"data"`
+	Path string    `json:"path"`
+}
+
+type exportKeyParams struct {
+	Derive      bool   `json:"derive"`
+	MakeCurrent bool   `json:"makeCurrent"`
+	OnlyPublic  bool   `json:"onlyPublic"`
+	Path        string `json:"path"`
+}
+
+type loadSeedParams struct {
+	Seed hexString `json:"seed"`
+}
+
+type pairParams struct {
+	PairingPassword string `json:"pairingPassword"`
+}
+
+type initSeedParams struct {
+	Pin             string `json:"pin"`
+	Puk             string `json:"puk"`
+	PairingPassword string `json:"pairingPassword"`
+}
+
+type changeSecretsParams struct {
+	Pin             string `json:"pin"`
+	Puk             string `json:"puk"`
+	PairingPassword string `json:"pairingPassword"`
+}
+
+type unpairParams struct {
+	Index uint8 `json:"index"`
+}
+
+type Signature struct {
+	PublicKey hexString `json:"publicKey"`
+	R         hexString `json:"r"`
+	S         hexString `json:"s"`
+	V         byte      `json:"v"`
+}
+
+type PairingInfo struct {
+	Key   hexString `json:"key"`
+	Index int       `json:"index"`
+}
+
+type ApplicationStatus struct {
+	PinRetryCount  int    `json:"pinRetryCount"`
+	PUKRetryCount  int    `json:"pukRetryCount"`
+	KeyInitialized bool   `json:"keyInitialized"`
+	Path           string `json:"path"`
+}

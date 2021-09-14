@@ -240,3 +240,154 @@ func (kc *keycardContext) generateKey() ([]byte, error) {
 
 	return keyUID, nil
 }
+
+func (kc *keycardContext) deriveKey(path string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.DeriveKey(path)
+	if err != nil {
+		l("deriveKey failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) signWithPath(data []byte, path string) (*types.Signature, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	sig, err := kc.cmdSet.SignWithPath(data, path)
+	if err != nil {
+		l("signWithPath failed %+v", err)
+		return nil, err
+	}
+
+	return sig, nil
+}
+
+func (kc *keycardContext) exportKey(derive bool, makeCurrent bool, onlyPublic bool, path string) ([]byte, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	key, err := kc.cmdSet.ExportKey(derive, makeCurrent, onlyPublic, path)
+	if err != nil {
+		l("exportKey failed %+v", err)
+		return nil, err
+	}
+
+	return key, nil
+}
+
+func (kc *keycardContext) loadSeed(seed []byte) ([]byte, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	pubKey, err := kc.cmdSet.LoadSeed(seed)
+	if err != nil {
+		l("loadSeed failed %+v", err)
+		return nil, err
+	}
+
+	return pubKey, nil
+}
+
+func (kc *keycardContext) init(pin, puk, pairingPassword string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	secrets := keycard.NewSecrets(pin, puk, pairingPassword)
+	err := kc.cmdSet.Init(secrets)
+	if err != nil {
+		l("init failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) unpair(index uint8) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.Unpair(index)
+	if err != nil {
+		l("unpair failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) getStatusApplication() (*types.ApplicationStatus, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	status, err := kc.cmdSet.GetStatusApplication()
+	if err != nil {
+		l("getStatusApplication failed %+v", err)
+		return nil, err
+	}
+
+	return status, nil
+}
+
+func (kc *keycardContext) changePin(pin string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.ChangePIN(pin)
+	if err != nil {
+		l("chaingePin failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) changePuk(puk string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.ChangePUK(puk)
+	if err != nil {
+		l("chaingePuk failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) changePairingPassword(pairingPassword string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.ChangePairingSecret(pairingPassword)
+	if err != nil {
+		l("chaingePairingPassword failed %+v", err)
+		return err
+	}
+
+	return nil
+}
