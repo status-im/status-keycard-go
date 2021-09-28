@@ -91,7 +91,16 @@ func Select() *C.char {
 		return retValue("error", err.Error())
 	}
 
-	return retValue("ok", true, "applicationInfo", info)
+	return retValue("ok", true, "applicationInfo", ApplicationInfo{
+		Installed:              info.Installed,
+		Initialized:            info.Initialized,
+		InstanceUID:            info.InstanceUID,
+		SecureChannelPublicKey: info.SecureChannelPublicKey,
+		Version:                info.Version,
+		AvailableSlots:         info.AvailableSlots,
+		KeyUID:                 info.KeyUID,
+		Capabilities:           Capability(info.Capabilities),
+	})
 }
 
 //export Stop
