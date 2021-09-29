@@ -9,6 +9,7 @@ import (
 	"github.com/status-im/keycard-go/globalplatform"
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
+	"github.com/status-im/nim-keycard-go/go/keycard/signal"
 )
 
 type keycardContext struct {
@@ -91,6 +92,7 @@ func (kc *keycardContext) run() {
 		return
 	}
 
+	signal.SendKeycardConnected("")
 	l("card found at index %d", index)
 	reader := kc.readers[index]
 

@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"unsafe"
+
+	"github.com/status-im/nim-keycard-go/go/keycard/signal"
 )
 
 var kctx *keycardContext
@@ -15,6 +18,10 @@ func main() {
 }
 
 func example() {
+	signal.SetDefaultNodeNotificationHandler(func(jsonEvent string) {
+		fmt.Printf("SIGNAL %+v\n", jsonEvent)
+	})
+
 	fmt.Printf("RUNNING EXAMPLE \n")
 	res := Start()
 	fmt.Printf("*** start %+v\n", C.GoString(res))
@@ -398,4 +405,9 @@ func ChangePairingPassword(jsonParams *C.char) *C.char {
 	}
 
 	return retValue("ok", true)
+}
+
+//export SetSignalEventCallback
+func SetSignalEventCallback(cb unsafe.Pointer) {
+	signal.SetSignalEventCallback(cb)
 }
