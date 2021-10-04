@@ -1,7 +1,6 @@
 package signal
 
 const (
-	// EventSignRequestAdded is triggered when send transaction request is queued
 	EventKeycardConnected = "keycard.connected"
 )
 

@@ -3,6 +3,7 @@ package main
 // #cgo LDFLAGS: -shared
 import "C"
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -103,8 +104,8 @@ func Select() *C.char {
 		Initialized:            info.Initialized,
 		InstanceUID:            info.InstanceUID,
 		SecureChannelPublicKey: info.SecureChannelPublicKey,
-		Version:                info.Version,
-		AvailableSlots:         info.AvailableSlots,
+		Version:                bytesToInt(info.Version),
+		AvailableSlots:         bytesToInt(info.AvailableSlots),
 		KeyUID:                 info.KeyUID,
 		Capabilities:           Capability(info.Capabilities),
 	})
@@ -410,4 +411,14 @@ func ChangePairingPassword(jsonParams *C.char) *C.char {
 //export SetSignalEventCallback
 func SetSignalEventCallback(cb unsafe.Pointer) {
 	signal.SetSignalEventCallback(cb)
+}
+
+func bytesToInt(s []byte) int {
+	if len(s) > 4 {
+		return 0
+	}
+
+	var b [4]byte
+	copy(b[4-len(s):], s)
+	return int(binary.BigEndian.Uint32(b[:]))
 }

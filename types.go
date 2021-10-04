@@ -93,8 +93,8 @@ type ApplicationInfo struct {
 	Initialized            bool      `json:"initialized"`
 	InstanceUID            hexString `json:"instanceUID"`
 	SecureChannelPublicKey hexString `json:"secureChannelPublicKey"`
-	Version                hexString `json:"version"`
-	AvailableSlots         hexString `json:"availableSlots"`
+	Version                int       `json:"version"`
+	AvailableSlots         int       `json:"availableSlots"`
 	// KeyUID is the sha256 of of the master public key on the card.
 	// It's empty if the card doesn't contain any key.
 	KeyUID       hexString  `json:"keyUID"`
