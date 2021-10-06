@@ -200,7 +200,7 @@ func GenerateKey() *C.char {
 		return retValue("error", err.Error())
 	}
 
-	return retValue("ok", true, "keyUID", keyUID)
+	return retValue("ok", true, "keyUID", hexString(keyUID))
 }
 
 //export DeriveKey
