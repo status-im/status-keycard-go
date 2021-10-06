@@ -273,19 +273,19 @@ func (kc *keycardContext) signWithPath(data []byte, path string) (*types.Signatu
 	return sig, nil
 }
 
-func (kc *keycardContext) exportKey(derive bool, makeCurrent bool, onlyPublic bool, path string) ([]byte, error) {
+func (kc *keycardContext) exportKey(derive bool, makeCurrent bool, onlyPublic bool, path string) ([]byte, []byte, error) {
 	<-kc.connected
 	if kc.runErr != nil {
-		return nil, kc.runErr
+		return nil, nil, kc.runErr
 	}
 
-	key, err := kc.cmdSet.ExportKey(derive, makeCurrent, onlyPublic, path)
+	privKey, pubKey, err := kc.cmdSet.ExportKey(derive, makeCurrent, onlyPublic, path)
 	if err != nil {
 		l("exportKey failed %+v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	return key, nil
+	return privKey, pubKey, nil
 }
 
 func (kc *keycardContext) loadSeed(seed []byte) ([]byte, error) {
