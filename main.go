@@ -9,6 +9,7 @@ import (
 	"time"
 	"unsafe"
 
+	keycard "github.com/status-im/keycard-go"
 	"github.com/status-im/nim-keycard-go/go/keycard/signal"
 )
 
@@ -181,6 +182,11 @@ func VerifyPin(jsonParams *C.char) *C.char {
 	}
 
 	err := kctx.verifyPin(params.Pin)
+
+	if wrongPing, ok := err.(*keycard.WrongPINError); ok {
+		return retValue("error", err.Error(), "remainingAttempts", wrongPing.RemainingAttempts)
+	}
+
 	if err != nil {
 		return retValue("error", err.Error())
 	}
