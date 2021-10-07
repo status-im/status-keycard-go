@@ -7,19 +7,17 @@
 #include <stdbool.h>
 #include "_cgo_export.h"
 
-typedef void (*callback)(const char *jsonEvent);
-callback gCallback = 0;
+typedef void (*keycardCallback)(const char *jsonEvent);
+keycardCallback gCallback = 0;
 
 bool KeycardServiceSignalEvent(const char *jsonEvent) {
 	if (gCallback) {
 		gCallback(jsonEvent);
-	} else {
-		NotifyNode((char *)jsonEvent); // re-send notification back to status node
 	}
 
 	return true;
 }
 
 void KeycardSetEventCallback(void *cb) {
-	gCallback = (callback)cb;
+	gCallback = (keycardCallback)cb;
 }

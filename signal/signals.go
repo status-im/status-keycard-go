@@ -12,8 +12,6 @@ import (
 	"encoding/json"
 	"unsafe"
 
-	"sync"
-
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -59,45 +57,9 @@ func send(typ string, event interface{}) {
 	}
 }
 
-// NodeNotificationHandler defines a handler able to process incoming node events.
-// Events are encoded as JSON strings.
-type NodeNotificationHandler func(jsonEvent string)
-
-var notificationHandler NodeNotificationHandler = TriggerDefaultNodeNotificationHandler
-
-// notificationHandlerMutex guards notificationHandler for concurrent calls
-var notificationHandlerMutex sync.RWMutex
-
-// SetDefaultNodeNotificationHandler sets notification handler to invoke on Send
-func SetDefaultNodeNotificationHandler(fn NodeNotificationHandler) {
-	notificationHandlerMutex.Lock()
-	notificationHandler = fn
-	notificationHandlerMutex.Unlock()
-}
-
-// ResetDefaultNodeNotificationHandler sets notification handler to default one
-func ResetDefaultNodeNotificationHandler() {
-	notificationHandlerMutex.Lock()
-	notificationHandler = TriggerDefaultNodeNotificationHandler
-	notificationHandlerMutex.Unlock()
-}
-
-// TriggerDefaultNodeNotificationHandler triggers default notification handler (helpful in tests)
-func TriggerDefaultNodeNotificationHandler(jsonEvent string) {
-	logger.Trace("Notification received", "event", jsonEvent)
-}
-
-//export NotifyNode
+//export KeycardTriggerTestSignal
 //nolint: golint
-func NotifyNode(jsonEvent *C.char) {
-	notificationHandlerMutex.RLock()
-	defer notificationHandlerMutex.RUnlock()
-	notificationHandler(C.GoString(jsonEvent))
-}
-
-//export TriggerTestSignal
-//nolint: golint
-func TriggerTestSignal() {
+func KeycardTriggerTestSignal() {
 	str := C.CString(`{"answer": 42}`)
 	C.KeycardServiceSignalEvent(str)
 	C.free(unsafe.Pointer(str))

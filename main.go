@@ -20,10 +20,6 @@ func main() {
 }
 
 func example() {
-	signal.SetDefaultNodeNotificationHandler(func(jsonEvent string) {
-		fmt.Printf("SIGNAL %+v\n", jsonEvent)
-	})
-
 	fmt.Printf("RUNNING EXAMPLE \n")
 	res := Start()
 	fmt.Printf("*** start %+v\n", C.GoString(res))
