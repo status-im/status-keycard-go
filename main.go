@@ -414,9 +414,9 @@ func ChangePairingPassword(jsonParams *C.char) *C.char {
 	return retValue("ok", true)
 }
 
-//export SetSignalEventCallback
-func SetSignalEventCallback(cb unsafe.Pointer) {
-	signal.SetSignalEventCallback(cb)
+//export KeycardSetSignalEventCallback
+func KeycardSetSignalEventCallback(cb unsafe.Pointer) {
+	signal.KeycardSetSignalEventCallback(cb)
 }
 
 func bytesToInt(s []byte) int {

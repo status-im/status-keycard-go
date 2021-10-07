@@ -10,7 +10,7 @@
 typedef void (*callback)(const char *jsonEvent);
 callback gCallback = 0;
 
-bool StatusServiceSignalEvent(const char *jsonEvent) {
+bool KeycardServiceSignalEvent(const char *jsonEvent) {
 	if (gCallback) {
 		gCallback(jsonEvent);
 	} else {
@@ -20,6 +20,6 @@ bool StatusServiceSignalEvent(const char *jsonEvent) {
 	return true;
 }
 
-void SetEventCallback(void *cb) {
+void KeycardSetEventCallback(void *cb) {
 	gCallback = (callback)cb;
 }

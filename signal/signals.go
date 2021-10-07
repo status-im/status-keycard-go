@@ -4,8 +4,8 @@ package signal
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
-extern bool StatusServiceSignalEvent(const char *jsonEvent);
-extern void SetEventCallback(void *cb);
+extern bool KeycardServiceSignalEvent(const char *jsonEvent);
+extern void KeycardSetEventCallback(void *cb);
 */
 import "C"
 import (
@@ -17,14 +17,14 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 )
 
-// MobileSignalHandler is a simple callback function that gets called when any signal is received
-type MobileSignalHandler func([]byte)
+// KeycardSignalHandler is a simple callback function that gets called when any signal is received
+type KeycardSignalHandler func([]byte)
 
 // storing the current signal handler here
-var mobileSignalHandler MobileSignalHandler
+var keycardSignalHandler KeycardSignalHandler
 
 // All general log messages in this package should be routed through this logger.
-var logger = log.New("package", "status-go/signal")
+var logger = log.New("package", "keycard-go/signal")
 
 // Envelope is a general signal sent upward from node to RN app
 type Envelope struct {
@@ -49,12 +49,12 @@ func send(typ string, event interface{}) {
 		return
 	}
 	// If a Go implementation of signal handler is set, let's use it.
-	if mobileSignalHandler != nil {
-		mobileSignalHandler(data)
+	if keycardSignalHandler != nil {
+		keycardSignalHandler(data)
 	} else {
 		// ...and fallback to C implementation otherwise.
 		str := C.CString(string(data))
-		C.StatusServiceSignalEvent(str)
+		C.KeycardServiceSignalEvent(str)
 		C.free(unsafe.Pointer(str))
 	}
 }
@@ -99,18 +99,18 @@ func NotifyNode(jsonEvent *C.char) {
 //nolint: golint
 func TriggerTestSignal() {
 	str := C.CString(`{"answer": 42}`)
-	C.StatusServiceSignalEvent(str)
+	C.KeycardServiceSignalEvent(str)
 	C.free(unsafe.Pointer(str))
 }
 
-// SetMobileSignalHandler sets new handler for geth events
+// SetKeycardSignalHandler sets new handler for geth events
 // this function uses pure go implementation
-func SetMobileSignalHandler(handler MobileSignalHandler) {
-	mobileSignalHandler = handler
+func SetKeycardSignalHandler(handler KeycardSignalHandler) {
+	keycardSignalHandler = handler
 }
 
-// SetSignalEventCallback set callback
+// KeycardSetSignalEventCallback set callback
 // this function uses C implementation (see `signals.c` file)
-func SetSignalEventCallback(cb unsafe.Pointer) {
-	C.SetEventCallback(cb)
+func KeycardSetSignalEventCallback(cb unsafe.Pointer) {
+	C.KeycardSetEventCallback(cb)
 }
