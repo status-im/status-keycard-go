@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ebfe/scard"
+	"github.com/ethereum/go-ethereum/crypto"
 	keycard "github.com/status-im/keycard-go"
 	"github.com/status-im/keycard-go/apdu"
 	"github.com/status-im/keycard-go/globalplatform"
@@ -273,19 +274,29 @@ func (kc *keycardContext) signWithPath(data []byte, path string) (*types.Signatu
 	return sig, nil
 }
 
-func (kc *keycardContext) exportKey(derive bool, makeCurrent bool, onlyPublic bool, path string) ([]byte, []byte, error) {
+func (kc *keycardContext) exportKey(derive bool, makeCurrent bool, onlyPublic bool, path string) ([]byte, []byte, string, error) {
 	<-kc.connected
 	if kc.runErr != nil {
-		return nil, nil, kc.runErr
+		return nil, nil, "", kc.runErr
 	}
 
+	address := ""
 	privKey, pubKey, err := kc.cmdSet.ExportKey(derive, makeCurrent, onlyPublic, path)
 	if err != nil {
 		l("exportKey failed %+v", err)
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
-	return privKey, pubKey, nil
+	if pubKey != nil {
+		ecdsaPubKey, err := crypto.UnmarshalPubkey(pubKey)
+		if err != nil {
+			return nil, nil, "", err
+		}
+
+		address = crypto.PubkeyToAddress(*ecdsaPubKey).Hex()
+	}
+
+	return privKey, pubKey, address, nil
 }
 
 func (kc *keycardContext) loadSeed(seed []byte) ([]byte, error) {

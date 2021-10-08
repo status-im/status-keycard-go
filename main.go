@@ -262,12 +262,12 @@ func ExportKey(jsonParams *C.char) *C.char {
 		return retValue("error", err.Error())
 	}
 
-	privKey, pubKey, err := kctx.exportKey(params.Derive, params.MakeCurrent, params.OnlyPublic, params.Path)
+	privKey, pubKey, address, err := kctx.exportKey(params.Derive, params.MakeCurrent, params.OnlyPublic, params.Path)
 	if err != nil {
 		return retValue("error", err.Error())
 	}
 
-	return retValue("ok", true, "privateKey", hexString(privKey), "publicKey", hexString(pubKey))
+	return retValue("ok", true, "privateKey", hexString(privKey), "publicKey", hexString(pubKey), "address", address)
 }
 
 //export LoadSeed
