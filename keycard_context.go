@@ -10,7 +10,7 @@ import (
 	"github.com/status-im/keycard-go/globalplatform"
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
-	"github.com/status-im/nim-keycard-go/go/keycard/signal"
+	"github.com/status-im/status-keycard-go/signal"
 )
 
 type keycardContext struct {

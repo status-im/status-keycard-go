@@ -5,73 +5,16 @@ import "C"
 import (
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
-	"time"
 	"unsafe"
 
 	keycard "github.com/status-im/keycard-go"
-	"github.com/status-im/nim-keycard-go/go/keycard/signal"
+	"github.com/status-im/status-keycard-go/signal"
 )
 
 var kctx *keycardContext
 
 func main() {
 	// example()
-}
-
-func example() {
-	fmt.Printf("RUNNING EXAMPLE \n")
-	res := Start()
-	fmt.Printf("*** start %+v\n", C.GoString(res))
-	time.Sleep(2)
-	res = Select()
-	fmt.Printf("*** select %+v\n", C.GoString(res))
-
-	// res = Init(C.CString(`{"pin": "123456", "puk": "123456789012", "pairingPassword": "KeycardTest"}`))
-	// fmt.Printf("*** OpenSecureChannel %+v\n", C.GoString(res))
-
-	// res = Pair(C.CString(`{"pairingPassword": "KeycardTest"}`))
-	// fmt.Printf("*** Pair %+v\n", C.GoString(res))
-
-	res = OpenSecureChannel(C.CString(`{"index":1, "key": "33b0b458d19df44b009ea8142b64e041837667355250d13f3b84f389f6350cc8"}`))
-	fmt.Printf("*** OpenSecureChannel %+v\n", C.GoString(res))
-
-	res = VerifyPin(C.CString(`{"pin": "123456"}`))
-	fmt.Printf("*** VerifyPin %+v\n", C.GoString(res))
-
-	res = ChangePin(C.CString(`{"pin": "123456"}`))
-	fmt.Printf("*** ChangePin %+v\n", C.GoString(res))
-
-	res = ChangePuk(C.CString(`{"puk": "123456789012"}`))
-	fmt.Printf("*** ChangePuk %+v\n", C.GoString(res))
-
-	res = ChangePairingPassword(C.CString(`{"pairingPassword": "KeycardTest"}`))
-	fmt.Printf("*** ChangePairingPassword %+v\n", C.GoString(res))
-
-	res = GetStatusApplication()
-	fmt.Printf("*** GetStatusApplication %+v\n", C.GoString(res))
-
-	// res = Unpair(C.CString(`{"index": 1}`))
-	// fmt.Printf("*** Unpair %+v\n", C.GoString(res))
-
-	// res = GenerateKey()
-	// fmt.Printf("*** GenerateKey %+v\n", C.GoString(res))
-
-	res = DeriveKey(C.CString(`{"path":"m/1/2/3/4/5"}`))
-	fmt.Printf("*** DeriveKey %+v\n", C.GoString(res))
-
-	res = SignWithPath(C.CString(`{"data": "0000000000000000000000000000000000000000000000000000000000000000", "path":"m/1/2/3/4/5"}`))
-	fmt.Printf("*** SignWithPath %+v\n", C.GoString(res))
-
-	res = ExportKey(C.CString(`{"derive": true, "makeCurrent": false, "onlyPublic": false, "path": "m/43'/60'/1581'/0'/0"}`))
-	fmt.Printf("*** ExportKey %+v\n", C.GoString(res))
-
-	res = LoadSeed(C.CString(`{"seed": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"}`))
-	fmt.Printf("*** LoadSeed %+v\n", C.GoString(res))
-
-	res = Stop()
-	fmt.Printf("*** stop %+v\n", C.GoString(res))
-	time.Sleep(10 * time.Second)
 }
 
 //export Start
