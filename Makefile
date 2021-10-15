@@ -1,6 +1,6 @@
 .PHONY: build-lib
 
-BUILD_PATH=$(realpath ./build)
+BUILD_PATH=$(realpath .)/build
 
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
  detected_OS := Windows
