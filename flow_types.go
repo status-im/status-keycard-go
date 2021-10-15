@@ -1,4 +1,4 @@
-package main
+package statuskeycardgo
 
 type FlowType int
 type runState int

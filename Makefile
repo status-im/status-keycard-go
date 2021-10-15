@@ -1,6 +1,6 @@
 .PHONY: build-lib
 
-BUILD=./build
+BUILD_PATH=$(realpath ./build)
 
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
  detected_OS := Windows
@@ -22,8 +22,27 @@ else
 endif
 
 build-lib:
-	mkdir -p $(BUILD)/libkeycard
+	mkdir -p $(BUILD_PATH)/libkeycard
 	@echo "Building static library..."
-	$(CGOFLAGS) go build -buildmode=c-shared -o $(BUILD)/libkeycard/libkeycard.$(LIB_EXT) .
+	cd shared && \
+		$(CGOFLAGS) go build -buildmode=c-shared -o $(BUILD_PATH)/libkeycard/libkeycard.$(LIB_EXT) .
 	@echo "Static library built:"
-	@ls -la $(BUILD)/libkeycard/*
+	@ls -la $(BUILD_PATH)/libkeycard/*
+
+build-example-shared: build-lib
+	mkdir -p $(BUILD_PATH)
+	@echo "Building example-c..."
+	cd examples/example-shared && \
+		go build -o $(BUILD_PATH)/example-shared
+
+run-example-shared: build-example-shared
+		LD_LIBRARY_PATH=$(BUILD_PATH)/libkeycard $(BUILD_PATH)/example-shared
+
+build-example-go: build-lib
+	mkdir -p $(BUILD_PATH)
+	@echo "Building example-c..."
+	cd examples/example-go && \
+		go build -o $(BUILD_PATH)/example-go
+
+run-example-go: build-example-go
+		$(BUILD_PATH)/example-go
