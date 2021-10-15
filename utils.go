@@ -2,7 +2,10 @@ package statuskeycardgo
 
 import "C"
 
-import "encoding/json"
+import (
+	"encoding/hex"
+	"encoding/json"
+)
 
 func retValue(pairs ...interface{}) *C.char {
 	obj := make(map[string]interface{})
@@ -18,4 +21,8 @@ func retValue(pairs ...interface{}) *C.char {
 	}
 
 	return C.CString(string(b))
+}
+
+func tox(bytes []byte) string {
+	return hex.EncodeToString(bytes)
 }
