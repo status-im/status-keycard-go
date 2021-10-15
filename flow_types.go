@@ -1,31 +1,37 @@
 package main
 
 type FlowType int
-type RunState int
+type runState int
 
 const (
-	GET_STATUS FlowType = iota
-	RECOVER_ACCOUNT
-	LOAD_ACCOUNT
-	LOGIN
-	SIGN
-	CHANGE_CREDENTIALS
-	UNPAIR
-	UNPAIR_OTHERS
-	DELETE_ACCOUNT_AND_UNPAIR
+	GetStatus FlowType = iota
+	RecoverAccount
+	LoadAccount
+	Login
+	Sign
+	ChangeCredentials
+	UnpairThis
+	UnpairOthers
+	DeleteAccountAndUnpair
 )
 
 const (
-	IDLE RunState = iota
-	RUNNING
-	PAUSED
-	RESUMING
-	CANCELLING
+	Idle runState = iota
+	Running
+	Paused
+	Resuming
+	Cancelling
+)
+
+const (
+	FlowResult   = "keycard.flow-result"
+	InsertCard   = "keycard.action.insert-card"
+	CardInserted = "keycard.action.card-inserted"
 )
 
 type keycardFlow struct {
 	flowType FlowType
-	state    RunState
+	state    runState
 	wakeUp   chan (struct{})
 	storage  string
 	params   map[string]string
