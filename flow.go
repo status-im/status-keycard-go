@@ -66,20 +66,19 @@ func (f *KeycardFlow) Cancel() error {
 	return nil
 }
 
-func errorToStatus(err error) (bool, FlowStatus) {
-	if _, ok := err.(*restartError); ok {
-		return true, FlowStatus{}
-	} else {
-		return false, FlowStatus{ErrorKey: err.Error()}
-	}
-}
-
 func (f *KeycardFlow) runFlow() {
-	repeat := true
 	var result FlowStatus
+	var err error
 
-	for repeat {
-		repeat, result = f.switchFlow()
+	for {
+		result, err = f.connectedFlow()
+
+		if _, ok := err.(*restartError); !ok {
+			if result == nil {
+				result = FlowStatus{ErrorKey: err.Error()}
+			}
+			break
+		}
 	}
 
 	if f.state != Cancelling {
@@ -89,12 +88,18 @@ func (f *KeycardFlow) runFlow() {
 	f.state = Idle
 }
 
-func (f *KeycardFlow) switchFlow() (bool, FlowStatus) {
+func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 	kc := f.connect()
 	defer f.closeKeycard(kc)
 
 	if kc == nil {
-		return false, FlowStatus{ErrorKey: ErrorConnection}
+		return nil, errors.New(ErrorConnection)
+	}
+
+	err := f.selectKeycard(kc)
+
+	if err != nil {
+		return nil, err
 	}
 
 	switch f.flowType {
@@ -103,7 +108,7 @@ func (f *KeycardFlow) switchFlow() (bool, FlowStatus) {
 	case RecoverAccount:
 		return f.recoverAccountFlow(kc)
 	default:
-		return false, FlowStatus{ErrorKey: ErrorUnknownFlow}
+		return nil, errors.New(ErrorUnknownFlow)
 	}
 }
 
@@ -188,16 +193,20 @@ func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	return nil
 }
 
-func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
-	err := f.selectKeycard(kc)
-
-	if err != nil {
-		return errorToStatus(err)
-	}
-
-	return false, FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}
+func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext) error {
+	return errors.New("not yet implemented")
 }
 
-func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (bool, FlowStatus) {
-	return false, FlowStatus{}
+func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (FlowStatus, error) {
+	return FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}, nil
+}
+
+func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (FlowStatus, error) {
+	err := f.openSCAndAuthenticate(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, errors.New("not yet implemented")
 }

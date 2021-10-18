@@ -49,10 +49,3 @@ func toAppInfo(r *ktypes.ApplicationInfo) ApplicationInfo {
 		KeyUID:         r.KeyUID,
 	}
 }
-
-func toPairInfo(r *ktypes.PairingInfo) PairingInfo {
-	return PairingInfo{
-		Key:   r.Key,
-		Index: r.Index,
-	}
-}
