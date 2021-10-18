@@ -1,8 +1,9 @@
 package statuskeycardgo
 
 type FlowType int
+type FlowParams map[string]interface{}
+type FlowStatus map[string]interface{}
 type runState int
-type stepState int
 
 const (
 	GetAppInfo FlowType = iota
@@ -48,6 +49,7 @@ const (
 type keycardFlow struct {
 	flowType FlowType
 	state    runState
+	active   chan (struct{})
 	wakeUp   chan (struct{})
 	storage  string
 	params   map[string]interface{}

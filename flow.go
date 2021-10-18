@@ -15,7 +15,7 @@ func NewFlow(storageDir string) (*keycardFlow, error) {
 	return flow, nil
 }
 
-func (f *keycardFlow) Start(flowType FlowType, params map[string]interface{}) error {
+func (f *keycardFlow) Start(flowType FlowType, params FlowParams) error {
 	if f.state != Idle {
 		return errors.New("already running")
 	}
@@ -23,12 +23,13 @@ func (f *keycardFlow) Start(flowType FlowType, params map[string]interface{}) er
 	f.flowType = flowType
 	f.params = params
 	f.state = Running
+	f.active = make(chan (struct{}))
 	go f.runFlow()
 
 	return nil
 }
 
-func (f *keycardFlow) Resume(params map[string]interface{}) error {
+func (f *keycardFlow) Resume(params FlowParams) error {
 	if f.state != Paused {
 		return errors.New("only paused flows can be resumed")
 	}
@@ -58,9 +59,13 @@ func (f *keycardFlow) Cancel() error {
 	return nil
 }
 
+func (f *keycardFlow) Wait() {
+	<-f.active
+}
+
 func (f *keycardFlow) runFlow() {
 	repeat := true
-	var result map[string]interface{}
+	var result FlowStatus
 
 	for repeat {
 		switch f.flowType {
@@ -74,30 +79,31 @@ func (f *keycardFlow) runFlow() {
 	}
 
 	f.state = Idle
+	close(f.active)
 }
 
-func (f *keycardFlow) switchFlow() (bool, map[string]interface{}) {
+func (f *keycardFlow) switchFlow() (bool, FlowStatus) {
 	kc := f.connect()
 	defer f.closeKeycard(kc)
 
 	if kc == nil {
-		return false, map[string]interface{}{ErrorKey: ErrorConnection}
+		return false, FlowStatus{ErrorKey: ErrorConnection}
 	}
 
 	switch f.flowType {
 	case GetAppInfo:
 		return f.getAppInfoFlow(kc)
 	default:
-		return false, map[string]interface{}{ErrorKey: ErrorUnknownFlow}
+		return false, FlowStatus{ErrorKey: ErrorUnknownFlow}
 	}
 }
 
-func (f *keycardFlow) pause(action string, status map[string]interface{}) {
+func (f *keycardFlow) pause(action string, status FlowStatus) {
 	signal.SendEvent(action, status)
 	f.state = Paused
 }
 
-func (f *keycardFlow) pauseAndWait(action string, status map[string]interface{}) bool {
+func (f *keycardFlow) pauseAndWait(action string, status FlowStatus) bool {
 	f.pause(action, status)
 	<-f.wakeUp
 
@@ -122,7 +128,7 @@ func (f *keycardFlow) connect() *keycardContext {
 		return nil
 	}
 
-	f.pause(InsertCard, map[string]interface{}{})
+	f.pause(InsertCard, FlowStatus{})
 	select {
 	case <-f.wakeUp:
 		if f.state != Cancelling {
@@ -147,7 +153,7 @@ func (f *keycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
 
 	if requiredInstanceUID, ok := f.params[InstanceUID]; ok {
 		if instanceUID := tox(appInfo.InstanceUID); instanceUID != requiredInstanceUID {
-			if f.pauseAndWait(SwapCard, map[string]interface{}{ErrorKey: InstanceUID, InstanceUID: instanceUID}) {
+			if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: InstanceUID, InstanceUID: instanceUID}) {
 				return true, nil
 			} else {
 				return false, errors.New(ErrorCancel)
@@ -157,7 +163,7 @@ func (f *keycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
 
 	if requiredKeyUID, ok := f.params[KeyUID]; ok {
 		if keyUID := tox(appInfo.KeyUID); keyUID != requiredKeyUID {
-			if f.pauseAndWait(SwapCard, map[string]interface{}{ErrorKey: KeyUID, KeyUID: keyUID}) {
+			if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: KeyUID, KeyUID: keyUID}) {
 				return true, nil
 			} else {
 				return false, errors.New(ErrorCancel)
@@ -168,14 +174,14 @@ func (f *keycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
 	return false, nil
 }
 
-func (f *keycardFlow) getAppInfoFlow(kc *keycardContext) (bool, map[string]interface{}) {
+func (f *keycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
 	restart, err := f.selectKeycard(kc)
 
 	if err != nil {
-		return false, map[string]interface{}{ErrorKey: err.Error()}
+		return false, FlowStatus{ErrorKey: err.Error()}
 	} else if restart {
 		return true, nil
 	}
 
-	return false, map[string]interface{}{ErrorKey: ErrorOK, AppInfo: kc.cmdSet.ApplicationInfo}
+	return false, FlowStatus{ErrorKey: ErrorOK, AppInfo: kc.cmdSet.ApplicationInfo}
 }
