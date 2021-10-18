@@ -4,7 +4,6 @@ import "C"
 
 import (
 	"fmt"
-	"time"
 
 	skg "github.com/status-im/status-keycard-go"
 )
@@ -19,10 +18,11 @@ func main() {
 		fmt.Printf("error: %+v\n", err)
 	}
 
-	err = flow.Start(skg.GetAppInfo, map[string]interface{}{})
-	time.Sleep(5 * time.Second)
+	err = flow.Start(skg.GetAppInfo, skg.FlowParams{})
 
 	if err != nil {
 		fmt.Printf("error: %+v\n", err)
 	}
+
+	flow.Wait()
 }
