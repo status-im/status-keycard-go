@@ -117,15 +117,15 @@ func (f *KeycardFlow) pause(action string, status FlowStatus) {
 	f.state = Paused
 }
 
-func (f *KeycardFlow) pauseAndWait(action string, status FlowStatus) bool {
+func (f *KeycardFlow) pauseAndWait(action string, status FlowStatus) error {
 	f.pause(action, status)
 	<-f.wakeUp
 
 	if f.state == Resuming {
 		f.state = Running
-		return true
+		return nil
 	} else {
-		return false
+		return errors.New("cancel")
 	}
 }
 
@@ -159,11 +159,11 @@ func (f *KeycardFlow) connect() *keycardContext {
 	}
 }
 
-func restartOrCancel(restart bool) error {
-	if restart {
+func restartOrCancel(cancel error) error {
+	if cancel == nil {
 		return restartErr()
 	} else {
-		return errors.New("cancel")
+		return cancel
 	}
 }
 
