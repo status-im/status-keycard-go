@@ -66,15 +66,20 @@ func (f *KeycardFlow) Cancel() error {
 	return nil
 }
 
+func errorToStatus(err error) (bool, FlowStatus) {
+	if _, ok := err.(*restartError); ok {
+		return true, FlowStatus{}
+	} else {
+		return false, FlowStatus{ErrorKey: err.Error()}
+	}
+}
+
 func (f *KeycardFlow) runFlow() {
 	repeat := true
 	var result FlowStatus
 
 	for repeat {
-		switch f.flowType {
-		case GetAppInfo:
-			repeat, result = f.switchFlow()
-		}
+		repeat, result = f.switchFlow()
 	}
 
 	if f.state != Cancelling {
@@ -95,6 +100,8 @@ func (f *KeycardFlow) switchFlow() (bool, FlowStatus) {
 	switch f.flowType {
 	case GetAppInfo:
 		return f.getAppInfoFlow(kc)
+	case RecoverAccount:
+		return f.recoverAccountFlow(kc)
 	default:
 		return false, FlowStatus{ErrorKey: ErrorUnknownFlow}
 	}
@@ -147,52 +154,50 @@ func (f *KeycardFlow) connect() *keycardContext {
 	}
 }
 
-func (f *KeycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
+func restartOrCancel(restart bool) error {
+	if restart {
+		return restartErr()
+	} else {
+		return errors.New("cancel")
+	}
+}
+
+func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	appInfo, err := kc.selectApplet()
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if !appInfo.Installed {
-		if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: ErrorNotAKeycard}) {
-			return true, nil
-		} else {
-			return false, errors.New(ErrorCancel)
-		}
+		return restartOrCancel(f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: ErrorNotAKeycard}))
 	}
 
 	if requiredInstanceUID, ok := f.params[InstanceUID]; ok {
 		if instanceUID := tox(appInfo.InstanceUID); instanceUID != requiredInstanceUID {
-			if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: InstanceUID, InstanceUID: instanceUID}) {
-				return true, nil
-			} else {
-				return false, errors.New(ErrorCancel)
-			}
+			return restartOrCancel(f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: InstanceUID, InstanceUID: instanceUID}))
 		}
 	}
 
 	if requiredKeyUID, ok := f.params[KeyUID]; ok {
 		if keyUID := tox(appInfo.KeyUID); keyUID != requiredKeyUID {
-			if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: KeyUID, KeyUID: keyUID}) {
-				return true, nil
-			} else {
-				return false, errors.New(ErrorCancel)
-			}
+			return restartOrCancel(f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: KeyUID, KeyUID: keyUID}))
 		}
 	}
 
-	return false, nil
+	return nil
 }
 
 func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
-	restart, err := f.selectKeycard(kc)
+	err := f.selectKeycard(kc)
 
 	if err != nil {
-		return false, FlowStatus{ErrorKey: err.Error()}
-	} else if restart {
-		return true, nil
+		return errorToStatus(err)
 	}
 
 	return false, FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}
+}
+
+func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (bool, FlowStatus) {
+	return false, FlowStatus{}
 }

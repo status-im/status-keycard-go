@@ -5,6 +5,16 @@ type FlowParams map[string]interface{}
 type FlowStatus map[string]interface{}
 type runState int
 
+type restartError struct{}
+
+func restartErr() (e *restartError) {
+	return &restartError{}
+}
+
+func (e *restartError) Error() string {
+	return "restart"
+}
+
 const (
 	GetAppInfo FlowType = iota
 	RecoverAccount
