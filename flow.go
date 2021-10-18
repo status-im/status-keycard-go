@@ -173,7 +173,7 @@ func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	appInfo, err := kc.selectApplet()
 
 	if err != nil {
-		return err
+		return restartErr()
 	}
 
 	if !appInfo.Installed {
