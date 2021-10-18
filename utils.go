@@ -3,8 +3,11 @@ package statuskeycardgo
 import "C"
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+
+	ktypes "github.com/status-im/keycard-go/types"
 )
 
 func retValue(pairs ...interface{}) *C.char {
@@ -25,4 +28,31 @@ func retValue(pairs ...interface{}) *C.char {
 
 func tox(bytes []byte) string {
 	return hex.EncodeToString(bytes)
+}
+
+func bytesToInt(s []byte) int {
+	if len(s) > 4 {
+		return 0
+	}
+
+	var b [4]byte
+	copy(b[4-len(s):], s)
+	return int(binary.BigEndian.Uint32(b[:]))
+}
+
+func toAppInfo(r *ktypes.ApplicationInfo) ApplicationInfo {
+	return ApplicationInfo{
+		Initialized:    r.Initialized,
+		InstanceUID:    r.InstanceUID,
+		Version:        bytesToInt(r.Version),
+		AvailableSlots: bytesToInt(r.AvailableSlots),
+		KeyUID:         r.KeyUID,
+	}
+}
+
+func toPairInfo(r *ktypes.PairingInfo) PairingInfo {
+	return PairingInfo{
+		Key:   r.Key,
+		Index: r.Index,
+	}
 }

@@ -6,8 +6,16 @@ import (
 	"github.com/status-im/status-keycard-go/signal"
 )
 
-func NewFlow(storageDir string) (*keycardFlow, error) {
-	flow := &keycardFlow{
+type KeycardFlow struct {
+	flowType FlowType
+	state    runState
+	wakeUp   chan (struct{})
+	storage  string
+	params   map[string]interface{}
+}
+
+func NewFlow(storageDir string) (*KeycardFlow, error) {
+	flow := &KeycardFlow{
 		wakeUp:  make(chan (struct{})),
 		storage: storageDir,
 	}
@@ -15,7 +23,7 @@ func NewFlow(storageDir string) (*keycardFlow, error) {
 	return flow, nil
 }
 
-func (f *keycardFlow) Start(flowType FlowType, params FlowParams) error {
+func (f *KeycardFlow) Start(flowType FlowType, params FlowParams) error {
 	if f.state != Idle {
 		return errors.New("already running")
 	}
@@ -23,13 +31,12 @@ func (f *keycardFlow) Start(flowType FlowType, params FlowParams) error {
 	f.flowType = flowType
 	f.params = params
 	f.state = Running
-	f.active = make(chan (struct{}))
 	go f.runFlow()
 
 	return nil
 }
 
-func (f *keycardFlow) Resume(params FlowParams) error {
+func (f *KeycardFlow) Resume(params FlowParams) error {
 	if f.state != Paused {
 		return errors.New("only paused flows can be resumed")
 	}
@@ -44,7 +51,7 @@ func (f *keycardFlow) Resume(params FlowParams) error {
 	return nil
 }
 
-func (f *keycardFlow) Cancel() error {
+func (f *KeycardFlow) Cancel() error {
 	prevState := f.state
 
 	if prevState != Idle {
@@ -59,11 +66,7 @@ func (f *keycardFlow) Cancel() error {
 	return nil
 }
 
-func (f *keycardFlow) Wait() {
-	<-f.active
-}
-
-func (f *keycardFlow) runFlow() {
+func (f *KeycardFlow) runFlow() {
 	repeat := true
 	var result FlowStatus
 
@@ -79,10 +82,9 @@ func (f *keycardFlow) runFlow() {
 	}
 
 	f.state = Idle
-	close(f.active)
 }
 
-func (f *keycardFlow) switchFlow() (bool, FlowStatus) {
+func (f *KeycardFlow) switchFlow() (bool, FlowStatus) {
 	kc := f.connect()
 	defer f.closeKeycard(kc)
 
@@ -98,12 +100,12 @@ func (f *keycardFlow) switchFlow() (bool, FlowStatus) {
 	}
 }
 
-func (f *keycardFlow) pause(action string, status FlowStatus) {
+func (f *KeycardFlow) pause(action string, status FlowStatus) {
 	signal.SendEvent(action, status)
 	f.state = Paused
 }
 
-func (f *keycardFlow) pauseAndWait(action string, status FlowStatus) bool {
+func (f *KeycardFlow) pauseAndWait(action string, status FlowStatus) bool {
 	f.pause(action, status)
 	<-f.wakeUp
 
@@ -115,13 +117,13 @@ func (f *keycardFlow) pauseAndWait(action string, status FlowStatus) bool {
 	}
 }
 
-func (f *keycardFlow) closeKeycard(kc *keycardContext) {
+func (f *KeycardFlow) closeKeycard(kc *keycardContext) {
 	if kc != nil {
 		kc.stop()
 	}
 }
 
-func (f *keycardFlow) connect() *keycardContext {
+func (f *KeycardFlow) connect() *keycardContext {
 	kc, err := startKeycardContext()
 
 	if err != nil {
@@ -140,15 +142,24 @@ func (f *keycardFlow) connect() *keycardContext {
 			return nil
 		}
 
+		signal.SendEvent(CardInserted, FlowStatus{})
 		return kc
 	}
 }
 
-func (f *keycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
+func (f *KeycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
 	appInfo, err := kc.selectApplet()
 
 	if err != nil {
 		return false, err
+	}
+
+	if !appInfo.Installed {
+		if f.pauseAndWait(SwapCard, FlowStatus{ErrorKey: ErrorNotAKeycard}) {
+			return true, nil
+		} else {
+			return false, errors.New(ErrorCancel)
+		}
 	}
 
 	if requiredInstanceUID, ok := f.params[InstanceUID]; ok {
@@ -174,7 +185,7 @@ func (f *keycardFlow) selectKeycard(kc *keycardContext) (bool, error) {
 	return false, nil
 }
 
-func (f *keycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
+func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
 	restart, err := f.selectKeycard(kc)
 
 	if err != nil {
@@ -183,5 +194,5 @@ func (f *keycardFlow) getAppInfoFlow(kc *keycardContext) (bool, FlowStatus) {
 		return true, nil
 	}
 
-	return false, FlowStatus{ErrorKey: ErrorOK, AppInfo: kc.cmdSet.ApplicationInfo}
+	return false, FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}
 }

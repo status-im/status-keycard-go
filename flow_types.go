@@ -38,6 +38,7 @@ const (
 	ErrorCancel      = "cancel"
 	ErrorConnection  = "connection-error"
 	ErrorUnknownFlow = "unknown-flow"
+	ErrorNotAKeycard = "not-a-keycard"
 )
 
 const (
@@ -45,12 +46,3 @@ const (
 	InstanceUID = "instance-uid"
 	KeyUID      = "key-uid"
 )
-
-type keycardFlow struct {
-	flowType FlowType
-	state    runState
-	active   chan (struct{})
-	wakeUp   chan (struct{})
-	storage  string
-	params   map[string]interface{}
-}

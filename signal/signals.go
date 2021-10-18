@@ -57,14 +57,6 @@ func send(typ string, event interface{}) {
 	}
 }
 
-//export KeycardTriggerTestSignal
-//nolint: golint
-func KeycardTriggerTestSignal() {
-	str := C.CString(`{"answer": 42}`)
-	C.KeycardServiceSignalEvent(str)
-	C.free(unsafe.Pointer(str))
-}
-
 // SetKeycardSignalHandler sets new handler for geth events
 // this function uses pure go implementation
 func SetKeycardSignalHandler(handler KeycardSignalHandler) {

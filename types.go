@@ -3,14 +3,13 @@ package statuskeycardgo
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 )
 
 type hexString []byte
 
 // MarshalJSON serializes hexString to hex
 func (s hexString) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(fmt.Sprintf("%x", string(s)))
+	bytes, err := json.Marshal(tox(s))
 	return bytes, err
 }
 
@@ -89,16 +88,13 @@ type Signature struct {
 type Capability uint8
 
 type ApplicationInfo struct {
-	Installed              bool      `json:"installed"`
-	Initialized            bool      `json:"initialized"`
-	InstanceUID            hexString `json:"instanceUID"`
-	SecureChannelPublicKey hexString `json:"secureChannelPublicKey"`
-	Version                int       `json:"version"`
-	AvailableSlots         int       `json:"availableSlots"`
+	Initialized    bool      `json:"initialized"`
+	InstanceUID    hexString `json:"instanceUID"`
+	Version        int       `json:"version"`
+	AvailableSlots int       `json:"availableSlots"`
 	// KeyUID is the sha256 of of the master public key on the card.
 	// It's empty if the card doesn't contain any key.
-	KeyUID       hexString  `json:"keyUID"`
-	Capabilities Capability `json:"capabilities"`
+	KeyUID hexString `json:"keyUID"`
 }
 
 type PairingInfo struct {
