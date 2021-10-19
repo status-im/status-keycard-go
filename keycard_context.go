@@ -244,6 +244,21 @@ func (kc *keycardContext) generateKey() ([]byte, error) {
 	return keyUID, nil
 }
 
+func (kc *keycardContext) removeKey() error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.RemoveKey()
+	if err != nil {
+		l("removeKey failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
 func (kc *keycardContext) deriveKey(path string) error {
 	<-kc.connected
 	if kc.runErr != nil {
