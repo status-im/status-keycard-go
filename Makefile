@@ -38,7 +38,7 @@ build-example-shared: build-lib
 run-example-shared: build-example-shared
 		LD_LIBRARY_PATH=$(BUILD_PATH)/libkeycard $(BUILD_PATH)/example-shared
 
-build-example-go: build-lib
+build-example-go:
 	mkdir -p $(BUILD_PATH)
 	@echo "Building example-c..."
 	cd examples/example-go && \
