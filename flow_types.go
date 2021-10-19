@@ -40,6 +40,8 @@ const (
 	InsertCard   = "keycard.action.insert-card"
 	CardInserted = "keycard.action.card-inserted"
 	SwapCard     = "keycard.action.swap-card"
+	EnterPairing = "keycard.action.enter-pairing"
+	EnterPIN     = "keycard.action.enter-pin"
 )
 
 const (
@@ -55,4 +57,5 @@ const (
 	AppInfo     = "application-info"
 	InstanceUID = "instance-uid"
 	KeyUID      = "key-uid"
+	PairingPass = "pairing-pass"
 )

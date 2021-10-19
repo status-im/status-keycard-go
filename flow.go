@@ -10,14 +10,20 @@ type KeycardFlow struct {
 	flowType FlowType
 	state    runState
 	wakeUp   chan (struct{})
-	storage  string
-	params   map[string]interface{}
+	pairings *pairingStore
+	params   FlowParams
 }
 
 func NewFlow(storageDir string) (*KeycardFlow, error) {
+	p, err := newPairingStore(storageDir)
+
+	if err != nil {
+		return nil, err
+	}
+
 	flow := &KeycardFlow{
-		wakeUp:  make(chan (struct{})),
-		storage: storageDir,
+		wakeUp:   make(chan (struct{})),
+		pairings: p,
 	}
 
 	return flow, nil
@@ -195,8 +201,67 @@ func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	return nil
 }
 
-func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext) error {
+func (f *KeycardFlow) pair(kc *keycardContext) error {
+	uid := tox(kc.cmdSet.ApplicationInfo.InstanceUID)
+
+	if pairingPass, ok := f.params[PairingPass]; ok {
+		pairing, err := kc.pair(pairingPass.(string))
+
+		if err == nil {
+			return f.pairings.store(uid, toPairInfo(pairing))
+		} else if isSCardError(err) {
+			return restartErr()
+		}
+
+		delete(f.params, PairingPass)
+	}
+
+	err := f.pauseAndWait(EnterPairing, FlowStatus{InstanceUID: uid})
+
+	if err != nil {
+		return err
+	}
+
+	return f.pair(kc)
+}
+
+func (f *KeycardFlow) openSC(kc *keycardContext) error {
+	uid := tox(kc.cmdSet.ApplicationInfo.InstanceUID)
+	pairing := f.pairings.get(uid)
+
+	if pairing != nil {
+		err := kc.openSecureChannel(pairing.Index, pairing.Key)
+
+		if err == nil {
+			return nil
+		} else if isSCardError(err) {
+			return restartErr()
+		}
+
+		f.pairings.delete(uid)
+	}
+
+	err := f.pair(kc)
+
+	if err != nil {
+		return err
+	}
+
+	return f.openSC(kc)
+}
+
+func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 	return errors.New("not yet implemented")
+}
+
+func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext) error {
+	err := f.openSC(kc)
+
+	if err != nil {
+		return err
+	}
+
+	return f.authenticate(kc)
 }
 
 func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (FlowStatus, error) {

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
+	"github.com/ebfe/scard"
 	ktypes "github.com/status-im/keycard-go/types"
 )
 
@@ -24,6 +25,11 @@ func retValue(pairs ...interface{}) *C.char {
 	}
 
 	return C.CString(string(b))
+}
+
+func isSCardError(err error) bool {
+	_, ok := err.(*scard.Error)
+	return ok
 }
 
 func tox(bytes []byte) string {
@@ -47,5 +53,12 @@ func toAppInfo(r *ktypes.ApplicationInfo) ApplicationInfo {
 		Version:        bytesToInt(r.Version),
 		AvailableSlots: bytesToInt(r.AvailableSlots),
 		KeyUID:         r.KeyUID,
+	}
+}
+
+func toPairInfo(r *ktypes.PairingInfo) *PairingInfo {
+	return &PairingInfo{
+		Key:   r.Key,
+		Index: r.Index,
 	}
 }
