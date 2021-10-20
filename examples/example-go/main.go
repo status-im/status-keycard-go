@@ -17,10 +17,12 @@ var flow *skg.KeycardFlow
 var finished chan (struct{})
 var ppIdx = 0
 var pairingPasses = [2]string{"WrongOne", "KeycardTest"}
+var correctPIN = "123456"
 
 func signalHandler(j []byte) {
 	var sig signal.Envelope
 	json.Unmarshal(j, &sig)
+	fmt.Printf("Received signal: %+v\n", sig)
 
 	go func() {
 		switch sig.Type {
@@ -36,6 +38,9 @@ func signalHandler(j []byte) {
 			fmt.Printf("Entering pass: %+v\n", pairingPasses[ppIdx])
 			flow.Resume(skg.FlowParams{skg.PairingPass: pairingPasses[ppIdx]})
 			ppIdx = (ppIdx + 1) % 2
+		case skg.EnterPIN:
+			fmt.Printf("Entering PIN: %+v\n", correctPIN)
+			flow.Resume(skg.FlowParams{skg.PIN: correctPIN})
 		case skg.FlowResult:
 			fmt.Printf("Flow result: %+v\n", sig.Event)
 			close(finished)
@@ -86,5 +91,5 @@ func main() {
 	signal.SetKeycardSignalHandler(signalHandler)
 
 	testFlow(skg.GetAppInfo, skg.FlowParams{})
-	testFlow(skg.RecoverAccount, skg.FlowParams{})
+	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PIN: "234567"})
 }

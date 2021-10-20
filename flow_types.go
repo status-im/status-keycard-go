@@ -54,8 +54,19 @@ const (
 )
 
 const (
-	AppInfo     = "application-info"
-	InstanceUID = "instance-uid"
-	KeyUID      = "key-uid"
-	PairingPass = "pairing-pass"
+	AppInfo      = "application-info"
+	InstanceUID  = "instance-uid"
+	FactoryReset = "factory reset"
+	KeyUID       = "key-uid"
+	FreeSlots    = "free-pairing-slots"
+	PINRetries   = "pin-retries"
+	PUKRetries   = "puk-retries"
+	PairingPass  = "pairing-pass"
+	PIN          = "pin"
+)
+
+const (
+	maxPINRetries = 3
+	maxPUKRetries = 5
+	maxFreeSlots  = 5
 )

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/ebfe/scard"
+	keycard "github.com/status-im/keycard-go"
 	ktypes "github.com/status-im/keycard-go/types"
 )
 
@@ -30,6 +31,14 @@ func retValue(pairs ...interface{}) *C.char {
 func isSCardError(err error) bool {
 	_, ok := err.(*scard.Error)
 	return ok
+}
+
+func getPinRetries(err error) (int, bool) {
+	if wrongPIN, ok := err.(*keycard.WrongPINError); ok {
+		return wrongPIN.RemainingAttempts, ok
+	} else {
+		return 0, false
+	}
 }
 
 func tox(bytes []byte) string {
