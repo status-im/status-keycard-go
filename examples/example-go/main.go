@@ -92,4 +92,5 @@ func main() {
 
 	testFlow(skg.GetAppInfo, skg.FlowParams{})
 	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PIN: "234567"})
+	testFlow(skg.UnpairThis, skg.FlowParams{skg.PIN: correctPIN})
 }
