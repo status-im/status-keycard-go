@@ -237,11 +237,9 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	err = kc.unpairCurrent()
+	err = f.unpairCurrent(kc)
 
-	if isSCardError(err) {
-		return nil, restartErr()
-	} else if err != nil {
+	if err != nil {
 		return nil, err
 	}
 

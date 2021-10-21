@@ -155,3 +155,23 @@ func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext) error {
 
 	return f.authenticate(kc)
 }
+
+func (f *KeycardFlow) unpairCurrent(kc *keycardContext) error {
+	err := kc.unpairCurrent()
+
+	if isSCardError(err) {
+		return restartErr()
+	}
+
+	return err
+}
+
+func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool) (*KeyPair, error) {
+	keyPair, err := kc.exportKey(true, false, onlyPublic, path)
+
+	if isSCardError(err) {
+		return nil, restartErr()
+	}
+
+	return keyPair, err
+}

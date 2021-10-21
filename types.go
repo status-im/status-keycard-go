@@ -108,3 +108,9 @@ type ApplicationStatus struct {
 	KeyInitialized bool   `json:"keyInitialized"`
 	Path           string `json:"path"`
 }
+
+type KeyPair struct {
+	Address    string    `json:"address"`
+	PublicKey  hexString `json:"publicKey"`
+	PrivateKey hexString `json:"privateKey"`
+}

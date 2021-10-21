@@ -70,3 +70,12 @@ const (
 	maxPUKRetries = 5
 	maxFreeSlots  = 5
 )
+
+const (
+	masterPath      = "m"
+	walletRoothPath = "m/44'/60'/0'/0"
+	walletPath      = walletRoothPath + "/0"
+	eip1581Path     = "m/43'/60'/1581'"
+	whisperPath     = eip1581Path + "/0'/0"
+	encryptionPath  = eip1581Path + "/1'/0"
+)
