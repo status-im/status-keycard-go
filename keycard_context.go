@@ -1,6 +1,7 @@
 package statuskeycardgo
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/ebfe/scard"
@@ -216,6 +217,10 @@ func (kc *keycardContext) verifyPin(pin string) error {
 	}
 
 	return nil
+}
+
+func (kc *keycardContext) unblockPUK(puk string, newPin string) error {
+	return errors.New("not implemented yet")
 }
 
 func (kc *keycardContext) generateKey() ([]byte, error) {

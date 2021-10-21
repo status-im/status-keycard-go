@@ -42,6 +42,10 @@ const (
 	SwapCard     = "keycard.action.swap-card"
 	EnterPairing = "keycard.action.enter-pairing"
 	EnterPIN     = "keycard.action.enter-pin"
+	EnterPUK     = "keycard.action.enter-puk"
+	EnterNewPair = "keycard.action.enter-new-pairing"
+	EnterNewPIN  = "keycard.action.enter-new-pin"
+	EnterNewPUK  = "keycard.action.enter-new-puk"
 )
 
 const (
@@ -63,7 +67,11 @@ const (
 	PINRetries   = "pin-retries"
 	PUKRetries   = "puk-retries"
 	PairingPass  = "pairing-pass"
+	NewPairing   = "new- pairing-pass"
 	PIN          = "pin"
+	NewPIN       = "new-pin"
+	PUK          = "puk"
+	NewPUK       = "new-puk"
 	MasterKey    = "master-key"
 	WalleRootKey = "wallet-root-key"
 	WalletKey    = "wallet-key"

@@ -109,7 +109,44 @@ func (f *KeycardFlow) openSC(kc *keycardContext) error {
 }
 
 func (f *KeycardFlow) unblockPUK(kc *keycardContext) error {
-	return errors.New("not yet implemented")
+	pukError := ""
+	var err error
+
+	newPIN, pinOK := f.params[NewPIN]
+	puk, pukOK := f.params[PUK]
+
+	if pinOK && pukOK {
+		err = kc.unblockPUK(puk.(string), newPIN.(string))
+
+		if err == nil {
+			f.cardInfo.pinRetries = maxPINRetries
+			f.cardInfo.pukRetries = maxPUKRetries
+			f.params[PIN] = newPIN
+			delete(f.params, NewPIN)
+			delete(f.params, PUK)
+			return nil
+		} else if isSCardError(err) {
+			return restartErr()
+		} else if leftRetries, ok := getPinRetries(err); ok {
+			f.cardInfo.pukRetries = leftRetries
+			delete(f.params, PUK)
+			pukOK = false
+		}
+
+		pukError = PUK
+	}
+
+	if !pukOK {
+		err = f.pauseAndWait(EnterPUK, pukError)
+	} else if !pinOK {
+		err = f.pauseAndWait(EnterNewPIN, "")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return f.unblockPUK(kc)
 }
 
 func (f *KeycardFlow) authenticate(kc *keycardContext) error {
@@ -132,6 +169,7 @@ func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 			return restartErr()
 		} else if leftRetries, ok := getPinRetries(err); ok {
 			f.cardInfo.pinRetries = leftRetries
+			delete(f.params, PIN)
 		}
 
 		pinError = PIN
