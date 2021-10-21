@@ -360,6 +360,10 @@ func (kc *keycardContext) unpair(index uint8) error {
 	return nil
 }
 
+func (kc *keycardContext) unpairCurrent() error {
+	return kc.unpair(uint8(kc.cmdSet.PairingInfo.Index))
+}
+
 func (kc *keycardContext) getStatusApplication() (*types.ApplicationStatus, error) {
 	<-kc.connected
 	if kc.runErr != nil {

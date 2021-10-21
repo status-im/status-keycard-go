@@ -237,5 +237,14 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	return nil, errors.New("not yet implemented")
+	err = kc.unpairCurrent()
+
+	if isSCardError(err) {
+		return nil, restartErr()
+	} else if err != nil {
+		return nil, err
+	}
+
+	f.cardInfo.freeSlots++
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, err
 }
