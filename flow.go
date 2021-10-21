@@ -152,6 +152,14 @@ func (f *KeycardFlow) pauseAndRestart(action string, errMsg string) error {
 	return restartErr()
 }
 
+func (f *KeycardFlow) requireKeys() error {
+	if f.cardInfo.keyUID != "" {
+		return nil
+	}
+
+	return f.pauseAndRestart(SwapCard, ErrorNoKeys)
+}
+
 func (f *KeycardFlow) closeKeycard(kc *keycardContext) {
 	if kc != nil {
 		kc.stop()
@@ -221,13 +229,51 @@ func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (FlowStatus, error) {
-	err := f.openSCAndAuthenticate(kc)
+	err := f.requireKeys()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, errors.New("not yet implemented")
+	err = f.openSCAndAuthenticate(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := FlowStatus{}
+
+	key, err := f.exportKey(kc, encryptionPath, false)
+	if err != nil {
+		return nil, err
+	}
+	result[EncKey] = key
+
+	key, err = f.exportKey(kc, whisperPath, false)
+	if err != nil {
+		return nil, err
+	}
+	result[WhisperKey] = key
+
+	key, err = f.exportKey(kc, walletRoothPath, true)
+	if err != nil {
+		return nil, err
+	}
+	result[WalleRootKey] = key
+
+	key, err = f.exportKey(kc, walletPath, true)
+	if err != nil {
+		return nil, err
+	}
+	result[WalletKey] = key
+
+	key, err = f.exportKey(kc, masterPath, true)
+	if err != nil {
+		return nil, err
+	}
+	result[MasterKey] = key
+
+	return result, nil
 }
 
 func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {

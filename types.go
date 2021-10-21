@@ -112,5 +112,5 @@ type ApplicationStatus struct {
 type KeyPair struct {
 	Address    string    `json:"address"`
 	PublicKey  hexString `json:"publicKey"`
-	PrivateKey hexString `json:"privateKey"`
+	PrivateKey hexString `json:"privateKey,omitempty"`
 }

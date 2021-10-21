@@ -51,6 +51,7 @@ const (
 	ErrorConnection  = "connection-error"
 	ErrorUnknownFlow = "unknown-flow"
 	ErrorNotAKeycard = "not-a-keycard"
+	ErrorNoKeys      = "no-keys"
 )
 
 const (
@@ -63,6 +64,12 @@ const (
 	PUKRetries   = "puk-retries"
 	PairingPass  = "pairing-pass"
 	PIN          = "pin"
+	MasterKey    = "master-key"
+	WalleRootKey = "wallet-root-key"
+	WalletKey    = "wallet-key"
+	EIP1581Key   = "eip1581-key"
+	WhisperKey   = "whisper-key"
+	EncKey       = "encryption-key"
 )
 
 const (
