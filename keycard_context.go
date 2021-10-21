@@ -219,7 +219,7 @@ func (kc *keycardContext) verifyPin(pin string) error {
 	return nil
 }
 
-func (kc *keycardContext) unblockPUK(puk string, newPin string) error {
+func (kc *keycardContext) unblockPIN(puk string, newPin string) error {
 	return errors.New("not implemented yet")
 }
 
