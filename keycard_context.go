@@ -249,6 +249,21 @@ func (kc *keycardContext) generateKey() ([]byte, error) {
 	return keyUID, nil
 }
 
+func (kc *keycardContext) generateMnemonic(checksumSize int) ([]int, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	indexes, err := kc.cmdSet.GenerateMnemonic(checksumSize)
+	if err != nil {
+		l("generateMnemonic failed %+v", err)
+		return nil, err
+	}
+
+	return indexes, nil
+}
+
 func (kc *keycardContext) removeKey() error {
 	<-kc.connected
 	if kc.runErr != nil {
