@@ -216,7 +216,9 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 	case GetAppInfo:
 		return f.getAppInfoFlow(kc)
 	case RecoverAccount:
-		return f.recoverAccountFlow(kc)
+		return f.exportKeysFlow(kc, true)
+	case Login:
+		return f.exportKeysFlow(kc, false)
 	case UnpairThis:
 		return f.unpairThisFlow(kc)
 	default:
@@ -228,7 +230,7 @@ func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (FlowStatus, error) {
 	return FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}, nil
 }
 
-func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (FlowStatus, error) {
+func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStatus, error) {
 	err := f.requireKeys()
 
 	if err != nil {
@@ -241,7 +243,7 @@ func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (FlowStatus, error)
 		return nil, err
 	}
 
-	result := FlowStatus{}
+	result := FlowStatus{KeyUID: f.cardInfo.keyUID}
 
 	key, err := f.exportKey(kc, encryptionPath, false)
 	if err != nil {
@@ -255,23 +257,31 @@ func (f *KeycardFlow) recoverAccountFlow(kc *keycardContext) (FlowStatus, error)
 	}
 	result[WhisperKey] = key
 
-	key, err = f.exportKey(kc, walletRoothPath, true)
-	if err != nil {
-		return nil, err
-	}
-	result[WalleRootKey] = key
+	if recover {
+		key, err = f.exportKey(kc, eip1581Path, true)
+		if err != nil {
+			return nil, err
+		}
+		result[EIP1581Key] = key
 
-	key, err = f.exportKey(kc, walletPath, true)
-	if err != nil {
-		return nil, err
-	}
-	result[WalletKey] = key
+		key, err = f.exportKey(kc, walletRoothPath, true)
+		if err != nil {
+			return nil, err
+		}
+		result[WalleRootKey] = key
 
-	key, err = f.exportKey(kc, masterPath, true)
-	if err != nil {
-		return nil, err
+		key, err = f.exportKey(kc, walletPath, true)
+		if err != nil {
+			return nil, err
+		}
+		result[WalletKey] = key
+
+		key, err = f.exportKey(kc, masterPath, true)
+		if err != nil {
+			return nil, err
+		}
+		result[MasterKey] = key
 	}
-	result[MasterKey] = key
 
 	return result, nil
 }
