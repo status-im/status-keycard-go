@@ -70,12 +70,14 @@ func (f *KeycardFlow) initCard(kc *keycardContext) error {
 	return errors.New("not implemented")
 }
 
-func (f *KeycardFlow) openSC(kc *keycardContext) error {
-	if !kc.cmdSet.ApplicationInfo.Initialized {
-		return f.initCard(kc)
-	}
+func (f *KeycardFlow) openSC(kc *keycardContext, giveup bool) error {
+	var pairing *PairingInfo
 
-	pairing := f.pairings.get(f.cardInfo.instanceUID)
+	if !kc.cmdSet.ApplicationInfo.Initialized && !giveup {
+		return f.initCard(kc)
+	} else {
+		pairing = f.pairings.get(f.cardInfo.instanceUID)
+	}
 
 	if pairing != nil {
 		err := kc.openSecureChannel(pairing.Index, pairing.Key)
@@ -99,13 +101,17 @@ func (f *KeycardFlow) openSC(kc *keycardContext) error {
 		f.pairings.delete(f.cardInfo.instanceUID)
 	}
 
+	if giveup {
+		return giveupErr()
+	}
+
 	err := f.pair(kc)
 
 	if err != nil {
 		return err
 	}
 
-	return f.openSC(kc)
+	return f.openSC(kc, giveup)
 }
 
 func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
@@ -184,8 +190,8 @@ func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 	return f.authenticate(kc)
 }
 
-func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext) error {
-	err := f.openSC(kc)
+func (f *KeycardFlow) openSCAndAuthenticate(kc *keycardContext, giveup bool) error {
+	err := f.openSC(kc, giveup)
 
 	if err != nil {
 		return err

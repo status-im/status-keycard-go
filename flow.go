@@ -219,15 +219,38 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 		return f.exportKeysFlow(kc, true)
 	case Login:
 		return f.exportKeysFlow(kc, false)
+	case LoadAccount:
+		return f.loadKeysFlow(kc)
+	case Sign:
+		return f.signFlow(kc)
+	case ChangeCredentials:
+		return f.changeCredentialsFlow(kc)
 	case UnpairThis:
 		return f.unpairThisFlow(kc)
+	case UnpairOthers:
+		return f.unpairOthersFlow(kc)
+	case DeleteAccountAndUnpair:
+		return f.deleteUnpairFlow(kc)
 	default:
 		return nil, errors.New(ErrorUnknownFlow)
 	}
 }
 
 func (f *KeycardFlow) getAppInfoFlow(kc *keycardContext) (FlowStatus, error) {
-	return FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}, nil
+	res := FlowStatus{ErrorKey: ErrorOK, AppInfo: toAppInfo(kc.cmdSet.ApplicationInfo)}
+	err := f.openSCAndAuthenticate(kc, true)
+
+	if err == nil {
+		res[Paired] = true
+		res[PINRetries] = f.cardInfo.pinRetries
+		res[PUKRetries] = f.cardInfo.pukRetries
+	} else if _, ok := err.(*giveupError); ok {
+		res[Paired] = false
+	} else {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStatus, error) {
@@ -237,7 +260,7 @@ func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStat
 		return nil, err
 	}
 
-	err = f.openSCAndAuthenticate(kc)
+	err = f.openSCAndAuthenticate(kc, false)
 
 	if err != nil {
 		return nil, err
@@ -286,8 +309,20 @@ func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStat
 	return result, nil
 }
 
+func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
+func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
+func (f *KeycardFlow) changeCredentialsFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
 func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
-	err := f.openSCAndAuthenticate(kc)
+	err := f.openSCAndAuthenticate(kc, true)
 
 	if err != nil {
 		return nil, err
@@ -301,4 +336,12 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 
 	f.cardInfo.freeSlots++
 	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, err
+}
+
+func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
+func (f *KeycardFlow) deleteUnpairFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
 }

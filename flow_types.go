@@ -6,6 +6,7 @@ type FlowStatus map[string]interface{}
 type runState int
 
 type restartError struct{}
+type giveupError struct{}
 
 func restartErr() (e *restartError) {
 	return &restartError{}
@@ -13,6 +14,14 @@ func restartErr() (e *restartError) {
 
 func (e *restartError) Error() string {
 	return "restart"
+}
+
+func giveupErr() (e *giveupError) {
+	return &giveupError{}
+}
+
+func (e *giveupError) Error() string {
+	return "giveup"
 }
 
 const (
@@ -67,6 +76,7 @@ const (
 	PINRetries   = "pin-retries"
 	PUKRetries   = "puk-retries"
 	PairingPass  = "pairing-pass"
+	Paired       = "paired"
 	NewPairing   = "new- pairing-pass"
 	PIN          = "pin"
 	NewPIN       = "new-pin"
@@ -78,6 +88,7 @@ const (
 	EIP1581Key   = "eip1581-key"
 	WhisperKey   = "whisper-key"
 	EncKey       = "encryption-key"
+	Mnemonic     = "mnemonic"
 )
 
 const (
