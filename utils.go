@@ -33,9 +33,11 @@ func isSCardError(err error) bool {
 	return ok
 }
 
-func getPinRetries(err error) (int, bool) {
+func getRetries(err error) (int, bool) {
 	if wrongPIN, ok := err.(*keycard.WrongPINError); ok {
 		return wrongPIN.RemainingAttempts, ok
+	} else if wrongPUK, ok := err.(*keycard.WrongPUKError); ok {
+		return wrongPUK.RemainingAttempts, ok
 	} else {
 		return 0, false
 	}

@@ -173,7 +173,7 @@ func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
 			return nil
 		} else if isSCardError(err) {
 			return restartErr()
-		} else if leftRetries, ok := getPinRetries(err); ok {
+		} else if leftRetries, ok := getRetries(err); ok {
 			f.cardInfo.pukRetries = leftRetries
 			delete(f.params, PUK)
 			pukOK = false
@@ -199,7 +199,7 @@ func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 	if f.cardInfo.pukRetries == 0 {
 		return f.pauseAndRestart(SwapCard, PUKRetries)
 	} else if f.cardInfo.pinRetries == 0 {
-		// succesful PUK unblock leaves the card authenticated
+		// succesful unblock leaves the card authenticated
 		return f.unblockPIN(kc)
 	}
 
@@ -213,7 +213,7 @@ func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 			return nil
 		} else if isSCardError(err) {
 			return restartErr()
-		} else if leftRetries, ok := getPinRetries(err); ok {
+		} else if leftRetries, ok := getRetries(err); ok {
 			f.cardInfo.pinRetries = leftRetries
 			delete(f.params, PIN)
 		}
