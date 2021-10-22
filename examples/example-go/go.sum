@@ -360,6 +360,8 @@ github.com/status-im/keycard-go v0.0.0-20211019092400-6448707c0dd9 h1:I2RY+KBHiC
 github.com/status-im/keycard-go v0.0.0-20211019092400-6448707c0dd9/go.mod h1:EyC0vqnPRbDQGq3j4Ej9lSP/nKE8DwwjTwfQ0Yan6SQ=
 github.com/status-im/keycard-go v0.0.0-20211022094747-07b455f49c05 h1:F3Jd745+qDIbezXxWglJ6ydleKnUOS7BCuqnXB3jb+c=
 github.com/status-im/keycard-go v0.0.0-20211022094747-07b455f49c05/go.mod h1:97vT0Rym0wCnK4B++hNA3nCetr0Mh1KXaVxzSt1arjg=
+github.com/status-im/keycard-go v0.0.0-20211022114056-24b008288867 h1:SvyugEbRxUw9Uk8U+U6NoUIknp4VrEi6HZW5b+mTVS0=
+github.com/status-im/keycard-go v0.0.0-20211022114056-24b008288867/go.mod h1:97vT0Rym0wCnK4B++hNA3nCetr0Mh1KXaVxzSt1arjg=
 github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570/go.mod h1:8OR4w3TdeIHIh1g6EMY5p0gVNOovcWC+1vpc7naMuAw=
 github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3/go.mod h1:hpGUWaI9xL8pRQCTXQgocU38Qw1g0Us7n5PxxTwTCYU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
