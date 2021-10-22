@@ -2,7 +2,6 @@ package statuskeycardgo
 
 import (
 	"crypto/sha512"
-	"errors"
 	"fmt"
 
 	"github.com/ebfe/scard"
@@ -224,8 +223,19 @@ func (kc *keycardContext) verifyPin(pin string) error {
 	return nil
 }
 
-func (kc *keycardContext) unblockPIN(puk string, newPin string) error {
-	return errors.New("not implemented yet")
+func (kc *keycardContext) unblockPIN(puk string, newPIN string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.UnblockPIN(puk, newPIN)
+	if err != nil {
+		l("unblockPIN failed %+v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (kc *keycardContext) generateKey() ([]byte, error) {
