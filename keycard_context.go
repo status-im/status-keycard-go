@@ -1,6 +1,7 @@
 package statuskeycardgo
 
 import (
+	"crypto/sha512"
 	"errors"
 	"fmt"
 
@@ -12,7 +13,11 @@ import (
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
 	"github.com/status-im/status-keycard-go/signal"
+	"golang.org/x/crypto/pbkdf2"
+	"golang.org/x/text/unicode/norm"
 )
+
+const bip39Salt = "mnemonic"
 
 type keycardContext struct {
 	cardCtx   *scard.Context
@@ -347,6 +352,11 @@ func (kc *keycardContext) loadSeed(seed []byte) ([]byte, error) {
 	}
 
 	return pubKey, nil
+}
+
+func (kc *keycardContext) loadMnemonic(mnemonic string, password string) ([]byte, error) {
+	seed := pbkdf2.Key(norm.NFKD.Bytes([]byte(mnemonic)), norm.NFKD.Bytes([]byte(bip39Salt+password)), 2048, 64, sha512.New)
+	return kc.loadSeed(seed)
 }
 
 func (kc *keycardContext) init(pin, puk, pairingPassword string) error {
