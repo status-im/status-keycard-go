@@ -69,19 +69,31 @@ func (f *KeycardFlow) initCard(kc *keycardContext) error {
 	newPIN, pinOK := f.params[NewPIN]
 
 	if !pinOK {
-		f.pauseAndWait(EnterNewPIN, ErrorRequireInit)
+		err := f.pauseAndWait(EnterNewPIN, ErrorRequireInit)
+		if err != nil {
+			return err
+		}
+
 		return f.initCard(kc)
 	}
 
 	newPUK, pukOK := f.params[NewPUK]
 	if !pukOK {
-		f.pauseAndWait(EnterNewPUK, ErrorRequireInit)
+		err := f.pauseAndWait(EnterNewPUK, ErrorRequireInit)
+		if err != nil {
+			return err
+		}
+
 		return f.initCard(kc)
 	}
 
 	newPairing, pairingOK := f.params[NewPairing]
 	if !pairingOK {
-		f.pauseAndWait(EnterNewPair, ErrorRequireInit)
+		err := f.pauseAndWait(EnterNewPair, ErrorRequireInit)
+		if err != nil {
+			return err
+		}
+
 		return f.initCard(kc)
 	}
 

@@ -218,7 +218,7 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 	case Login:
 		return f.exportKeysFlow(kc, false)
 	case ExportPublic:
-		return f.exportPublic(kc)
+		return f.exportPublicFlow(kc)
 	case LoadAccount:
 		return f.loadKeysFlow(kc)
 	case Sign:
@@ -313,8 +313,35 @@ func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStat
 	return result, nil
 }
 
-func (f *KeycardFlow) exportPublic(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+func (f *KeycardFlow) exportPublicFlow(kc *keycardContext) (FlowStatus, error) {
+	err := f.requireKeys()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	path, ok := f.params[BIP44Path]
+
+	if !ok {
+		err := f.pauseAndWait(EnterPath, ErrorExporting)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	key, err := f.exportKey(kc, path.(string), true)
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{KeyUID: f.cardInfo.keyUID, ExportedKey: key}, nil
 }
 
 func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
@@ -351,7 +378,7 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 	}
 
 	f.cardInfo.freeSlots++
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, err
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, nil
 }
 
 func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {

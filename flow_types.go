@@ -98,6 +98,7 @@ const (
 	EIP1581Key   = "eip1581-key"
 	WhisperKey   = "whisper-key"
 	EncKey       = "encryption-key"
+	ExportedKey  = "exported-key"
 	Mnemonic     = "mnemonic"
 	TXHash       = "tx-hash"
 	BIP44Path    = "bip44-path"
