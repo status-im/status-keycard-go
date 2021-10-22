@@ -217,12 +217,18 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 		return f.exportKeysFlow(kc, true)
 	case Login:
 		return f.exportKeysFlow(kc, false)
+	case ExportPublic:
+		return f.exportPublic(kc)
 	case LoadAccount:
 		return f.loadKeysFlow(kc)
 	case Sign:
 		return f.signFlow(kc)
-	case ChangeCredentials:
-		return f.changeCredentialsFlow(kc)
+	case ChangePIN:
+		return f.changePINFlow(kc)
+	case ChangePUK:
+		return f.changePUKFlow(kc)
+	case ChangePairing:
+		return f.changePairingFlow(kc)
 	case UnpairThis:
 		return f.unpairThisFlow(kc)
 	case UnpairOthers:
@@ -307,6 +313,10 @@ func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStat
 	return result, nil
 }
 
+func (f *KeycardFlow) exportPublic(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
 func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
 	return nil, errors.New("not implemented yet")
 }
@@ -315,7 +325,15 @@ func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
 	return nil, errors.New("not implemented yet")
 }
 
-func (f *KeycardFlow) changeCredentialsFlow(kc *keycardContext) (FlowStatus, error) {
+func (f *KeycardFlow) changePINFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
+func (f *KeycardFlow) changePUKFlow(kc *keycardContext) (FlowStatus, error) {
+	return nil, errors.New("not implemented yet")
+}
+
+func (f *KeycardFlow) changePairingFlow(kc *keycardContext) (FlowStatus, error) {
 	return nil, errors.New("not implemented yet")
 }
 

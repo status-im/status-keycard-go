@@ -29,8 +29,11 @@ const (
 	RecoverAccount
 	LoadAccount
 	Login
+	ExportPublic
 	Sign
-	ChangeCredentials
+	ChangePIN
+	ChangePUK
+	ChangePairing
 	UnpairThis
 	UnpairOthers
 	DeleteAccountAndUnpair
@@ -55,6 +58,8 @@ const (
 	EnterNewPair = "keycard.action.enter-new-pairing"
 	EnterNewPIN  = "keycard.action.enter-new-pin"
 	EnterNewPUK  = "keycard.action.enter-new-puk"
+	EnterTXHash  = "keycard.action.enter-tx-hash"
+	EnterPath    = "keycard.action.enter-bip44-path"
 )
 
 const (
@@ -68,6 +73,8 @@ const (
 	ErrorRequireInit = "require-init"
 	ErrorPairing     = "pairing"
 	ErrorUnblocking  = "unblocking"
+	ErrorSigning     = "signing"
+	ErrorExporting   = "exporting"
 )
 
 const (
@@ -92,6 +99,9 @@ const (
 	WhisperKey   = "whisper-key"
 	EncKey       = "encryption-key"
 	Mnemonic     = "mnemonic"
+	TXHash       = "tx-hash"
+	BIP44Path    = "bip44-path"
+	TXSignature  = "tx-signature"
 )
 
 const (
