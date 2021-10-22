@@ -56,7 +56,7 @@ func (f *KeycardFlow) pair(kc *keycardContext) error {
 		delete(f.params, PairingPass)
 	}
 
-	err := f.pauseAndWait(EnterPairing, "")
+	err := f.pauseAndWait(EnterPairing, ErrorPairing)
 
 	if err != nil {
 		return err
@@ -66,8 +66,36 @@ func (f *KeycardFlow) pair(kc *keycardContext) error {
 }
 
 func (f *KeycardFlow) initCard(kc *keycardContext) error {
-	//NOTE: after init a restart of the flow is always needed
-	return errors.New("not implemented")
+	newPIN, pinOK := f.params[NewPIN]
+
+	if !pinOK {
+		f.pauseAndWait(EnterNewPIN, ErrorRequireInit)
+		return f.initCard(kc)
+	}
+
+	newPUK, pukOK := f.params[NewPUK]
+	if !pukOK {
+		f.pauseAndWait(EnterNewPUK, ErrorRequireInit)
+		return f.initCard(kc)
+	}
+
+	newPairing, pairingOK := f.params[NewPairing]
+	if !pairingOK {
+		f.pauseAndWait(EnterNewPair, ErrorRequireInit)
+		return f.initCard(kc)
+	}
+
+	err := kc.init(newPIN.(string), newPUK.(string), newPairing.(string))
+
+	if err == nil {
+		f.params[PIN] = newPIN
+		f.params[PairingPass] = newPairing
+		delete(f.params, NewPIN)
+		delete(f.params, NewPUK)
+		delete(f.params, NewPairing)
+	}
+
+	return err
 }
 
 func (f *KeycardFlow) openSC(kc *keycardContext, giveup bool) error {
@@ -145,7 +173,7 @@ func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
 	if !pukOK {
 		err = f.pauseAndWait(EnterPUK, pukError)
 	} else if !pinOK {
-		err = f.pauseAndWait(EnterNewPIN, "")
+		err = f.pauseAndWait(EnterNewPIN, ErrorUnblocking)
 	}
 
 	if err != nil {

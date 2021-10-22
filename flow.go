@@ -107,9 +107,7 @@ func (f *KeycardFlow) runFlow() {
 func (f *KeycardFlow) pause(action string, errMsg string) {
 	status := FlowParams{}
 
-	if errMsg != "" {
-		status[ErrorKey] = errMsg
-	}
+	status[ErrorKey] = errMsg
 
 	if f.cardInfo.freeSlots != -1 {
 		status[InstanceUID] = f.cardInfo.instanceUID
@@ -128,7 +126,7 @@ func (f *KeycardFlow) pause(action string, errMsg string) {
 
 func (f *KeycardFlow) pauseAndWait(action string, errMsg string) error {
 	if f.state == Cancelling {
-		return errors.New("cancel")
+		return giveupErr()
 	}
 
 	f.pause(action, errMsg)
@@ -138,7 +136,7 @@ func (f *KeycardFlow) pauseAndWait(action string, errMsg string) error {
 		f.state = Running
 		return nil
 	} else {
-		return errors.New("cancel")
+		return giveupErr()
 	}
 }
 
@@ -173,7 +171,7 @@ func (f *KeycardFlow) connect() *keycardContext {
 		return nil
 	}
 
-	f.pause(InsertCard, "")
+	f.pause(InsertCard, ErrorConnection)
 	select {
 	case <-f.wakeUp:
 		if f.state != Cancelling {

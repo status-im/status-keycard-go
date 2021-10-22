@@ -65,6 +65,9 @@ const (
 	ErrorUnknownFlow = "unknown-flow"
 	ErrorNotAKeycard = "not-a-keycard"
 	ErrorNoKeys      = "no-keys"
+	ErrorRequireInit = "require-init"
+	ErrorPairing     = "pairing"
+	ErrorUnblocking  = "unblocking"
 )
 
 const (
