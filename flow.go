@@ -382,9 +382,51 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.openSCAndAuthenticate(kc, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < maxFreeSlots; i++ {
+		if i == kc.cmdSet.PairingInfo.Index {
+			continue
+		}
+
+		err = f.unpair(kc, i)
+
+		if err != nil {
+			return nil, err
+		}
+
+		f.cardInfo.freeSlots++
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, nil
 }
 
 func (f *KeycardFlow) deleteUnpairFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.openSCAndAuthenticate(kc, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.removeKey(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	f.cardInfo.keyUID = ""
+
+	err = f.unpairCurrent(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	f.cardInfo.freeSlots++
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID, FreeSlots: f.cardInfo.freeSlots}, nil
 }

@@ -250,6 +250,26 @@ func (f *KeycardFlow) unpairCurrent(kc *keycardContext) error {
 	return err
 }
 
+func (f *KeycardFlow) unpair(kc *keycardContext, idx int) error {
+	err := kc.unpair(uint8(idx))
+
+	if isSCardError(err) {
+		return restartErr()
+	}
+
+	return err
+}
+
+func (f *KeycardFlow) removeKey(kc *keycardContext) error {
+	err := kc.removeKey()
+
+	if isSCardError(err) {
+		return restartErr()
+	}
+
+	return err
+}
+
 func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool) (*KeyPair, error) {
 	keyPair, err := kc.exportKey(true, false, onlyPublic, path)
 
