@@ -353,15 +353,51 @@ func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) changePINFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.changePIN(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
 }
 
 func (f *KeycardFlow) changePUKFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.changePUK(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
 }
 
 func (f *KeycardFlow) changePairingFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.changePairing(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
 }
 
 func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
@@ -399,7 +435,6 @@ func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {
 			return nil, err
 		}
 
-		f.cardInfo.freeSlots++
 	}
 
 	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, nil

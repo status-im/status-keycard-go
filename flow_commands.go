@@ -279,3 +279,69 @@ func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool
 
 	return keyPair, err
 }
+
+func (f *KeycardFlow) changePIN(kc *keycardContext) error {
+	if newPIN, ok := f.params[NewPIN]; ok {
+		err := kc.changePin(newPIN.(string))
+
+		if isSCardError(err) {
+			return restartErr()
+		} else if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	err := f.pauseAndWait(EnterNewPIN, ErrorChanging)
+
+	if err != nil {
+		return err
+	}
+
+	return f.changePIN(kc)
+}
+
+func (f *KeycardFlow) changePUK(kc *keycardContext) error {
+	if newPUK, ok := f.params[NewPUK]; ok {
+		err := kc.changePuk(newPUK.(string))
+
+		if isSCardError(err) {
+			return restartErr()
+		} else if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	err := f.pauseAndWait(EnterNewPUK, ErrorChanging)
+
+	if err != nil {
+		return err
+	}
+
+	return f.changePUK(kc)
+}
+
+func (f *KeycardFlow) changePairing(kc *keycardContext) error {
+	if newPairing, ok := f.params[NewPairing]; ok {
+		err := kc.changePairingPassword(newPairing.(string))
+
+		if isSCardError(err) {
+			return restartErr()
+		} else if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	err := f.pauseAndWait(EnterNewPair, ErrorChanging)
+
+	if err != nil {
+		return err
+	}
+
+	return f.changePairing(kc)
+}

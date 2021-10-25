@@ -75,6 +75,7 @@ const (
 	ErrorUnblocking  = "unblocking"
 	ErrorSigning     = "signing"
 	ErrorExporting   = "exporting"
+	ErrorChanging    = "changing-credentials"
 )
 
 const (
