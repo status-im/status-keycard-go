@@ -9,6 +9,7 @@ import (
 	keycard "github.com/status-im/keycard-go"
 	"github.com/status-im/keycard-go/apdu"
 	"github.com/status-im/keycard-go/globalplatform"
+	"github.com/status-im/keycard-go/identifiers"
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
 	"golang.org/x/crypto/pbkdf2"
@@ -456,6 +457,37 @@ func (kc *keycardContext) changePairingPassword(pairingPassword string) error {
 	err := kc.cmdSet.ChangePairingSecret(pairingPassword)
 	if err != nil {
 		l("chaingePairingPassword failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) factoryReset(pairingPassword string) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	cmdSet := globalplatform.NewCommandSet(kc.c)
+	if err := cmdSet.OpenSecureChannel(); err != nil {
+		l("open secure channel failed", "error", err)
+		return err
+	}
+
+	aid, err := identifiers.KeycardInstanceAID(1)
+	if err != nil {
+		l("error getting keycard aid %+v", err)
+		return err
+	}
+
+	if err := cmdSet.DeleteObject(aid); err != nil {
+		l("error deleting keycard aid %+v", err)
+		return err
+	}
+
+	if err := cmdSet.InstallKeycardApplet(); err != nil {
+		l("error installing Keycard applet %+v", err)
 		return err
 	}
 
