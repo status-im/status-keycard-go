@@ -98,7 +98,7 @@ func (f *KeycardFlow) runFlow() {
 	}
 
 	if f.state != Cancelling {
-		signal.SendEvent(FlowResult, result)
+		signal.Send(FlowResult, result)
 	}
 
 	f.state = Idle
@@ -120,7 +120,7 @@ func (f *KeycardFlow) pause(action string, errMsg string) {
 		status[PUKRetries] = f.cardInfo.pukRetries
 	}
 
-	signal.SendEvent(action, status)
+	signal.Send(action, status)
 	f.state = Paused
 }
 
@@ -183,7 +183,7 @@ func (f *KeycardFlow) connect() *keycardContext {
 			return nil
 		}
 
-		signal.SendEvent(CardInserted, FlowStatus{})
+		signal.Send(CardInserted, FlowStatus{})
 		return kc
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/status-im/keycard-go/globalplatform"
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
-	"github.com/status-im/status-keycard-go/signal"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/text/unicode/norm"
 )
@@ -98,7 +97,6 @@ func (kc *keycardContext) run() {
 		return
 	}
 
-	signal.SendKeycardConnected("")
 	l("card found at index %d", index)
 	reader := kc.readers[index]
 

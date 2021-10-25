@@ -39,7 +39,7 @@ func NewEnvelope(typ string, event interface{}) *Envelope {
 }
 
 // send sends application signal (in JSON) upwards to application (via default notification handler)
-func send(typ string, event interface{}) {
+func Send(typ string, event interface{}) {
 	signal := NewEnvelope(typ, event)
 	data, err := json.Marshal(&signal)
 	if err != nil {
