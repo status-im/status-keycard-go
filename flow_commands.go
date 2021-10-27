@@ -1,12 +1,14 @@
 package statuskeycardgo
 
-import "errors"
-
 func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
-	// on success, remove the FactoryReset switch to avoid re-triggering it
-	// if card is disconnected/reconnected
-	delete(f.params, FactoryReset)
-	return errors.New("not implemented")
+	err := kc.factoryReset()
+
+	if err == nil {
+		delete(f.params, FactoryReset)
+		return restartErr()
+	} else {
+		return err
+	}
 }
 
 func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {

@@ -463,7 +463,7 @@ func (kc *keycardContext) changePairingPassword(pairingPassword string) error {
 	return nil
 }
 
-func (kc *keycardContext) factoryReset(pairingPassword string) error {
+func (kc *keycardContext) factoryReset() error {
 	<-kc.connected
 	if kc.runErr != nil {
 		return kc.runErr
