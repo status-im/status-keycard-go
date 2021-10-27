@@ -326,17 +326,8 @@ func (f *KeycardFlow) exportPublicFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	path, ok := f.params[BIP44Path]
+	key, err := f.exportBIP44Key(kc)
 
-	if !ok {
-		err := f.pauseAndWait(EnterPath, ErrorExporting)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	key, err := f.exportKey(kc, path.(string), true)
 	if err != nil {
 		return nil, err
 	}
@@ -349,7 +340,25 @@ func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.requireKeys()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := f.sign(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{KeyUID: f.cardInfo.keyUID, TXSignature: signature}, nil
 }
 
 func (f *KeycardFlow) changePINFlow(kc *keycardContext) (FlowStatus, error) {

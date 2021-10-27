@@ -1,7 +1,6 @@
 package statuskeycardgo
 
 import (
-	"encoding/hex"
 	"encoding/json"
 )
 
@@ -9,7 +8,7 @@ type hexString []byte
 
 // MarshalJSON serializes hexString to hex
 func (s hexString) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(tox(s))
+	bytes, err := json.Marshal(btox(s))
 	return bytes, err
 }
 
@@ -20,7 +19,7 @@ func (s *hexString) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	str, err := hex.DecodeString(x)
+	str, err := xtob(x)
 	if err != nil {
 		return err
 	}
@@ -79,10 +78,9 @@ type unpairParams struct {
 }
 
 type Signature struct {
-	PublicKey hexString `json:"publicKey"`
-	R         hexString `json:"r"`
-	S         hexString `json:"s"`
-	V         byte      `json:"v"`
+	R hexString `json:"r"`
+	S hexString `json:"s"`
+	V byte      `json:"v"`
 }
 
 type Capability uint8

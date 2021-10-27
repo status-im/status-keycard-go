@@ -12,8 +12,8 @@ func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
 func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	appInfo, err := kc.selectApplet()
 
-	f.cardInfo.instanceUID = tox(appInfo.InstanceUID)
-	f.cardInfo.keyUID = tox(appInfo.KeyUID)
+	f.cardInfo.instanceUID = btox(appInfo.InstanceUID)
+	f.cardInfo.keyUID = btox(appInfo.KeyUID)
 	f.cardInfo.freeSlots = bytesToInt(appInfo.AvailableSlots)
 
 	if err != nil {
@@ -280,6 +280,22 @@ func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool
 	return keyPair, err
 }
 
+func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (*KeyPair, error) {
+	path, ok := f.params[BIP44Path]
+
+	if ok {
+		return f.exportKey(kc, path.(string), true)
+	}
+
+	err := f.pauseAndWait(EnterPath, ErrorExporting)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return f.exportBIP44Key(kc)
+}
+
 func (f *KeycardFlow) changePIN(kc *keycardContext) error {
 	if newPIN, ok := f.params[NewPIN]; ok {
 		err := kc.changePin(newPIN.(string))
@@ -344,4 +360,49 @@ func (f *KeycardFlow) changePairing(kc *keycardContext) error {
 	}
 
 	return f.changePairing(kc)
+}
+
+func (f *KeycardFlow) sign(kc *keycardContext) (*Signature, error) {
+	var err error
+
+	path, pathOK := f.params[BIP44Path]
+
+	if !pathOK {
+		err = f.pauseAndWait(EnterPath, ErrorSigning)
+		if err != nil {
+			return nil, err
+		}
+
+		return f.sign(kc)
+	}
+
+	hash, hashOK := f.params[TXHash]
+
+	var rawHash []byte
+
+	if hashOK {
+		rawHash, err = xtob(hash.(string))
+		if err != nil {
+			hashOK = false
+		}
+	}
+
+	if !hashOK {
+		err := f.pauseAndWait(EnterTXHash, ErrorSigning)
+		if err != nil {
+			return nil, err
+		}
+
+		return f.sign(kc)
+	}
+
+	signature, err := kc.signWithPath(rawHash, path.(string))
+
+	if isSCardError(err) {
+		return nil, restartErr()
+	} else if err != nil {
+		return nil, err
+	}
+
+	return toSignature(signature), nil
 }
