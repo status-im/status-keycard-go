@@ -48,18 +48,19 @@ const (
 )
 
 const (
-	FlowResult   = "keycard.flow-result"
-	InsertCard   = "keycard.action.insert-card"
-	CardInserted = "keycard.action.card-inserted"
-	SwapCard     = "keycard.action.swap-card"
-	EnterPairing = "keycard.action.enter-pairing"
-	EnterPIN     = "keycard.action.enter-pin"
-	EnterPUK     = "keycard.action.enter-puk"
-	EnterNewPair = "keycard.action.enter-new-pairing"
-	EnterNewPIN  = "keycard.action.enter-new-pin"
-	EnterNewPUK  = "keycard.action.enter-new-puk"
-	EnterTXHash  = "keycard.action.enter-tx-hash"
-	EnterPath    = "keycard.action.enter-bip44-path"
+	FlowResult    = "keycard.flow-result"
+	InsertCard    = "keycard.action.insert-card"
+	CardInserted  = "keycard.action.card-inserted"
+	SwapCard      = "keycard.action.swap-card"
+	EnterPairing  = "keycard.action.enter-pairing"
+	EnterPIN      = "keycard.action.enter-pin"
+	EnterPUK      = "keycard.action.enter-puk"
+	EnterNewPair  = "keycard.action.enter-new-pairing"
+	EnterNewPIN   = "keycard.action.enter-new-pin"
+	EnterNewPUK   = "keycard.action.enter-new-puk"
+	EnterTXHash   = "keycard.action.enter-tx-hash"
+	EnterPath     = "keycard.action.enter-bip44-path"
+	EnterMnemonic = "keycard.action.enter-mnemonic"
 )
 
 const (
@@ -70,12 +71,14 @@ const (
 	ErrorUnknownFlow = "unknown-flow"
 	ErrorNotAKeycard = "not-a-keycard"
 	ErrorNoKeys      = "no-keys"
+	ErrorHasKeys     = "has-keys"
 	ErrorRequireInit = "require-init"
 	ErrorPairing     = "pairing"
 	ErrorUnblocking  = "unblocking"
 	ErrorSigning     = "signing"
 	ErrorExporting   = "exporting"
 	ErrorChanging    = "changing-credentials"
+	ErrorLoading     = "loading-keys"
 )
 
 const (
@@ -104,6 +107,7 @@ const (
 	TXHash       = "tx-hash"
 	BIP44Path    = "bip44-path"
 	TXSignature  = "tx-signature"
+	Overwrite    = "overwrite"
 )
 
 const (

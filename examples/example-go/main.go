@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	skg "github.com/status-im/status-keycard-go"
 	"github.com/status-im/status-keycard-go/signal"
@@ -15,9 +14,10 @@ import (
 
 var flow *skg.KeycardFlow
 var finished chan (struct{})
-var ppIdx = 0
-var pairingPasses = [2]string{"WrongOne", "KeycardTest"}
+var correctPairing = "KeycardTest"
 var correctPIN = "123456"
+var correctPUK = "123456123456"
+var keyUID = "136cbfc087cf7df6cf3248bce7563d4253b302b2f9e2b5eef8713fa5091409bc"
 
 func signalHandler(j []byte) {
 	var sig signal.Envelope
@@ -31,16 +31,23 @@ func signalHandler(j []byte) {
 		case skg.CardInserted:
 			fmt.Printf("Card inserted\n")
 		case skg.SwapCard:
-			fmt.Printf("Swap card. You have 5 seconds\n")
-			time.Sleep(5 * time.Second)
-			flow.Resume(skg.FlowParams{})
+			fmt.Printf("Swap card. Changing constraint\n")
+			flow.Resume(skg.FlowParams{skg.KeyUID: keyUID})
 		case skg.EnterPairing:
-			fmt.Printf("Entering pass: %+v\n", pairingPasses[ppIdx])
-			flow.Resume(skg.FlowParams{skg.PairingPass: pairingPasses[ppIdx]})
-			ppIdx = (ppIdx + 1) % 2
+			fmt.Printf("Entering pass: %+v\n", correctPairing)
+			flow.Resume(skg.FlowParams{skg.PairingPass: correctPairing})
 		case skg.EnterPIN:
 			fmt.Printf("Entering PIN: %+v\n", correctPIN)
 			flow.Resume(skg.FlowParams{skg.PIN: correctPIN})
+		case skg.EnterNewPIN:
+			fmt.Printf("Creating PIN: %+v\n", correctPIN)
+			flow.Resume(skg.FlowParams{skg.NewPIN: correctPIN})
+		case skg.EnterNewPUK:
+			fmt.Printf("Creating PUK: %+v\n", correctPUK)
+			flow.Resume(skg.FlowParams{skg.NewPUK: correctPUK})
+		case skg.EnterNewPair:
+			fmt.Printf("Creating pairing: %+v\n", correctPairing)
+			flow.Resume(skg.FlowParams{skg.NewPairing: correctPairing})
 		case skg.FlowResult:
 			fmt.Printf("Flow result: %+v\n", sig.Event)
 			close(finished)
@@ -90,10 +97,13 @@ func main() {
 
 	signal.SetKeycardSignalHandler(signalHandler)
 
+	testFlow(skg.GetAppInfo, skg.FlowParams{skg.FactoryReset: true})
+	testFlow(skg.LoadAccount, skg.FlowParams{skg.Mnemonic: "receive fan copper bracket end train again sustain wet siren throw cigar"})
+	testFlow(skg.UnpairThis, skg.FlowParams{skg.PIN: correctPIN})
+	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PairingPass: "WrongPass", skg.PIN: "234567"})
+	testFlow(skg.Login, skg.FlowParams{skg.KeyUID: "60a78c98d5dd659f714eb7072bfb2c0d8a65f74a8f6aff7bb27cf56ae1feec17"})
 	testFlow(skg.GetAppInfo, skg.FlowParams{})
-	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PIN: "234567"})
-	testFlow(skg.Login, skg.FlowParams{})
-	testFlow(skg.GetAppInfo, skg.FlowParams{})
+	testFlow(skg.ExportPublic, skg.FlowParams{skg.BIP44Path: "m/44'/60'/0'/0/1"})
 	testFlow(skg.Sign, skg.FlowParams{skg.TXHash: "60a78c98d5dd659f714eb7072bfb2c0d8a65f74a8f6aff7bb27cf56ae1feec17", skg.BIP44Path: "m/44'/60'/0'/0/0"})
 	testFlow(skg.UnpairThis, skg.FlowParams{skg.PIN: correctPIN})
 }

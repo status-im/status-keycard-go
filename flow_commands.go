@@ -101,15 +101,17 @@ func (f *KeycardFlow) initCard(kc *keycardContext) error {
 
 	err := kc.init(newPIN.(string), newPUK.(string), newPairing.(string))
 
-	if err == nil {
-		f.params[PIN] = newPIN
-		f.params[PairingPass] = newPairing
-		delete(f.params, NewPIN)
-		delete(f.params, NewPUK)
-		delete(f.params, NewPairing)
+	if err != nil {
+		return err
 	}
 
-	return err
+	f.params[PIN] = newPIN
+	f.params[PairingPass] = newPairing
+	delete(f.params, NewPIN)
+	delete(f.params, NewPUK)
+	delete(f.params, NewPairing)
+
+	return restartErr()
 }
 
 func (f *KeycardFlow) openSC(kc *keycardContext, giveup bool) error {
@@ -283,9 +285,7 @@ func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool
 }
 
 func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (*KeyPair, error) {
-	path, ok := f.params[BIP44Path]
-
-	if ok {
+	if path, ok := f.params[BIP44Path]; ok {
 		return f.exportKey(kc, path.(string), true)
 	}
 
@@ -296,6 +296,29 @@ func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (*KeyPair, error) {
 	}
 
 	return f.exportBIP44Key(kc)
+}
+
+func (f *KeycardFlow) loadKeys(kc *keycardContext) error {
+	if mnemonic, ok := f.params[Mnemonic]; ok {
+		keyUID, err := kc.loadMnemonic(mnemonic.(string), "")
+
+		if isSCardError(err) {
+			return restartErr()
+		} else if err != nil {
+			return err
+		}
+
+		f.cardInfo.keyUID = btox(keyUID)
+		return nil
+	}
+
+	err := f.pauseAndWait(EnterMnemonic, ErrorLoading)
+
+	if err != nil {
+		return err
+	}
+
+	return f.loadKeys(kc)
 }
 
 func (f *KeycardFlow) changePIN(kc *keycardContext) error {

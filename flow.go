@@ -101,6 +101,7 @@ func (f *KeycardFlow) runFlow() {
 		signal.Send(FlowResult, result)
 	}
 
+	f.params = nil
 	f.state = Idle
 }
 
@@ -156,6 +157,18 @@ func (f *KeycardFlow) requireKeys() error {
 	}
 
 	return f.pauseAndRestart(SwapCard, ErrorNoKeys)
+}
+
+func (f *KeycardFlow) requireNoKeys() error {
+	if f.cardInfo.keyUID == "" {
+		return nil
+	}
+
+	if overwrite, ok := f.params[Overwrite]; ok && overwrite.(bool) {
+		return nil
+	}
+
+	return f.pauseAndRestart(SwapCard, ErrorHasKeys)
 }
 
 func (f *KeycardFlow) closeKeycard(kc *keycardContext) {
@@ -336,7 +349,25 @@ func (f *KeycardFlow) exportPublicFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
-	return nil, errors.New("not implemented yet")
+	err := f.requireNoKeys()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.openSCAndAuthenticate(kc, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.loadKeys(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{KeyUID: f.cardInfo.keyUID}, nil
 }
 
 func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
