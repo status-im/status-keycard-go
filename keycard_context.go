@@ -29,7 +29,7 @@ type keycardContext struct {
 }
 
 func startKeycardContext() (*keycardContext, error) {
-	kctx = &keycardContext{
+	kctx := &keycardContext{
 		connected: make(chan (struct{})),
 	}
 	err := kctx.start()

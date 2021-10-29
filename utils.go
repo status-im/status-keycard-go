@@ -1,32 +1,13 @@
 package statuskeycardgo
 
-import "C"
-
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 
 	"github.com/ebfe/scard"
 	keycard "github.com/status-im/keycard-go"
 	ktypes "github.com/status-im/keycard-go/types"
 )
-
-func retValue(pairs ...interface{}) *C.char {
-	obj := make(map[string]interface{})
-	for i := 0; i < len(pairs)/2; i++ {
-		key := pairs[i*2]
-		value := pairs[(i*2)+1]
-		obj[key.(string)] = value
-	}
-
-	b, err := json.Marshal(obj)
-	if err != nil {
-		return C.CString(err.Error())
-	}
-
-	return C.CString(string(b))
-}
 
 func isSCardError(err error) bool {
 	_, ok := err.(scard.Error)
