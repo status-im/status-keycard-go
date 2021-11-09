@@ -4,9 +4,9 @@ go 1.16
 
 require (
 	github.com/ebfe/scard v0.0.0-20190212122703-c3d1b1916a95
-	github.com/ethereum/go-ethereum v1.10.11
-	github.com/status-im/keycard-go v0.0.0-20211022114056-24b008288867
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
+	github.com/ethereum/go-ethereum v1.10.12
+	github.com/status-im/keycard-go v0.0.0-20211109104530-b0e0482ba91d
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
+	golang.org/x/sys v0.0.0-20211109065445-02f5c0300f6e // indirect
 	golang.org/x/text v0.3.7
 )
