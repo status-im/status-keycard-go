@@ -46,19 +46,23 @@ func (f *KeycardFlow) pair(kc *keycardContext) error {
 		return f.pauseAndRestart(SwapCard, FreeSlots)
 	}
 
-	if pairingPass, ok := f.params[PairingPass]; ok {
-		pairing, err := kc.pair(pairingPass.(string))
+	pairingPass, ok := f.params[PairingPass]
 
-		if err == nil {
-			return f.pairings.store(f.cardInfo.instanceUID, toPairInfo(pairing))
-		} else if isSCardError(err) {
-			return restartErr()
-		}
-
-		delete(f.params, PairingPass)
+	if !ok {
+		pairingPass = DefPairing
 	}
 
-	err := f.pauseAndWait(EnterPairing, ErrorPairing)
+	pairing, err := kc.pair(pairingPass.(string))
+
+	if err == nil {
+		return f.pairings.store(f.cardInfo.instanceUID, toPairInfo(pairing))
+	} else if isSCardError(err) {
+		return restartErr()
+	}
+
+	delete(f.params, PairingPass)
+
+	err = f.pauseAndWait(EnterPairing, ErrorPairing)
 
 	if err != nil {
 		return err
@@ -91,12 +95,7 @@ func (f *KeycardFlow) initCard(kc *keycardContext) error {
 
 	newPairing, pairingOK := f.params[NewPairing]
 	if !pairingOK {
-		err := f.pauseAndWait(EnterNewPair, ErrorRequireInit)
-		if err != nil {
-			return err
-		}
-
-		return f.initCard(kc)
+		newPairing = DefPairing
 	}
 
 	err := kc.init(newPIN.(string), newPUK.(string), newPairing.(string))
