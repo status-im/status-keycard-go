@@ -14,7 +14,7 @@ import (
 
 var flow *skg.KeycardFlow
 var finished chan (struct{})
-var correctPairing = "KeycardTest"
+var correctPairing = "KeycardDefaultPairing"
 var correctPIN = "123456"
 var correctPUK = "123456123456"
 var keyUID = "136cbfc087cf7df6cf3248bce7563d4253b302b2f9e2b5eef8713fa5091409bc"
