@@ -1,11 +1,15 @@
 package main
 
 // #cgo LDFLAGS: -shared
+// #include <stdlib.h>
 import "C"
+
 import (
 	"encoding/json"
+	"unsafe"
 
 	skg "github.com/status-im/status-keycard-go"
+	"github.com/status-im/status-keycard-go/signal"
 )
 
 func main() {}
@@ -66,4 +70,14 @@ func KeycardResumeFlow(jsonParams *C.char) *C.char {
 func KeycardCancelFlow() *C.char {
 	err := globalFlow.Cancel()
 	return retErr(err)
+}
+
+//export Free
+func Free(param unsafe.Pointer) {
+	C.free(param)
+}
+
+//export KeycardSetSignalEventCallback
+func KeycardSetSignalEventCallback(cb unsafe.Pointer) {
+	signal.KeycardSetSignalEventCallback(cb)
 }
