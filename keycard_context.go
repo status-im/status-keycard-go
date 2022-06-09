@@ -237,6 +237,7 @@ func (kc *keycardContext) unblockPIN(puk string, newPIN string) error {
 	return nil
 }
 
+//lint:ignore U1000 will be used
 func (kc *keycardContext) generateKey() ([]byte, error) {
 	<-kc.connected
 	if kc.runErr != nil {
@@ -293,6 +294,7 @@ func (kc *keycardContext) removeKey() error {
 	return nil
 }
 
+//lint:ignore U1000 will be used
 func (kc *keycardContext) deriveKey(path string) error {
 	<-kc.connected
 	if kc.runErr != nil {

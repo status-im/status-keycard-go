@@ -311,7 +311,20 @@ func (f *KeycardFlow) loadKeys(kc *keycardContext) error {
 		return nil
 	}
 
-	err := f.pauseAndWait(EnterMnemonic, ErrorLoading)
+	mnemonicLength, ok := f.params[MnemonicLen]
+	if !ok {
+		mnemonicLength = defMnemoLen
+	}
+
+	indexes, err := kc.generateMnemonic(mnemonicLength.(int) / 3)
+
+	if isSCardError(err) {
+		return restartErr()
+	} else if err != nil {
+		return err
+	}
+
+	err = f.pauseAndWaitWithStatus(EnterMnemonic, ErrorLoading, FlowParams{MnemonicIdxs: indexes})
 
 	if err != nil {
 		return err

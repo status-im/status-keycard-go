@@ -48,6 +48,9 @@ func signalHandler(j []byte) {
 		case skg.EnterNewPair:
 			fmt.Printf("Creating pairing: %+v\n", correctPairing)
 			flow.Resume(skg.FlowParams{skg.NewPairing: correctPairing})
+		case skg.EnterMnemonic:
+			fmt.Printf("Loading mnemonic\n")
+			flow.Resume(skg.FlowParams{skg.Mnemonic: "receive fan copper bracket end train again sustain wet siren throw cigar"})
 		case skg.FlowResult:
 			fmt.Printf("Flow result: %+v\n", sig.Event)
 			close(finished)
@@ -98,7 +101,7 @@ func main() {
 	signal.SetKeycardSignalHandler(signalHandler)
 
 	testFlow(skg.GetAppInfo, skg.FlowParams{skg.FactoryReset: true})
-	testFlow(skg.LoadAccount, skg.FlowParams{skg.Mnemonic: "receive fan copper bracket end train again sustain wet siren throw cigar"})
+	testFlow(skg.LoadAccount, skg.FlowParams{skg.MnemonicLen: 12})
 	testFlow(skg.UnpairThis, skg.FlowParams{skg.PIN: correctPIN})
 	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PairingPass: "WrongPass", skg.PIN: "234567"})
 	testFlow(skg.Login, skg.FlowParams{skg.KeyUID: "60a78c98d5dd659f714eb7072bfb2c0d8a65f74a8f6aff7bb27cf56ae1feec17"})

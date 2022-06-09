@@ -105,9 +105,7 @@ func (f *KeycardFlow) runFlow() {
 	f.state = Idle
 }
 
-func (f *KeycardFlow) pause(action string, errMsg string) {
-	status := FlowParams{}
-
+func (f *KeycardFlow) pause(action string, errMsg string, status FlowParams) {
 	status[ErrorKey] = errMsg
 
 	if f.cardInfo.freeSlots != -1 {
@@ -125,12 +123,12 @@ func (f *KeycardFlow) pause(action string, errMsg string) {
 	f.state = Paused
 }
 
-func (f *KeycardFlow) pauseAndWait(action string, errMsg string) error {
+func (f *KeycardFlow) pauseAndWaitWithStatus(action string, errMsg string, status FlowParams) error {
 	if f.state == Cancelling {
 		return giveupErr()
 	}
 
-	f.pause(action, errMsg)
+	f.pause(action, errMsg, status)
 	<-f.wakeUp
 
 	if f.state == Resuming {
@@ -139,6 +137,10 @@ func (f *KeycardFlow) pauseAndWait(action string, errMsg string) error {
 	} else {
 		return giveupErr()
 	}
+}
+
+func (f *KeycardFlow) pauseAndWait(action string, errMsg string) error {
+	return f.pauseAndWaitWithStatus(action, errMsg, FlowParams{})
 }
 
 func (f *KeycardFlow) pauseAndRestart(action string, errMsg string) error {
@@ -184,7 +186,7 @@ func (f *KeycardFlow) connect() *keycardContext {
 		return nil
 	}
 
-	f.pause(InsertCard, ErrorConnection)
+	f.pause(InsertCard, ErrorConnection, FlowParams{})
 	select {
 	case <-f.wakeUp:
 		if f.state != Cancelling {

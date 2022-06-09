@@ -105,6 +105,8 @@ const (
 	EncKey       = "encryption-key"
 	ExportedKey  = "exported-key"
 	Mnemonic     = "mnemonic"
+	MnemonicLen  = "mnemonic-length"
+	MnemonicIdxs = "mnemonic-indexes"
 	TXHash       = "tx-hash"
 	BIP44Path    = "bip44-path"
 	TXSignature  = "tx-signature"
@@ -115,6 +117,7 @@ const (
 	maxPINRetries = 3
 	maxPUKRetries = 5
 	maxFreeSlots  = 5
+	defMnemoLen   = 12
 )
 
 const (
