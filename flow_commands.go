@@ -316,7 +316,7 @@ func (f *KeycardFlow) loadKeys(kc *keycardContext) error {
 		mnemonicLength = defMnemoLen
 	}
 
-	indexes, err := kc.generateMnemonic(mnemonicLength.(int) / 3)
+	indexes, err := kc.generateMnemonic(int(mnemonicLength.(float64)) / 3)
 
 	if isSCardError(err) {
 		return restartErr()
