@@ -472,6 +472,12 @@ func (kc *keycardContext) factoryReset() error {
 	}
 
 	cmdSet := globalplatform.NewCommandSet(kc.c)
+
+	if err := cmdSet.Select(); err != nil {
+		l("select ISD failed", "error", err)
+		return err
+	}
+
 	if err := cmdSet.OpenSecureChannel(); err != nil {
 		l("open secure channel failed", "error", err)
 		return err
