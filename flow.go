@@ -69,7 +69,7 @@ func (f *KeycardFlow) Resume(params FlowParams) error {
 func (f *KeycardFlow) Cancel() error {
 	prevState := f.state
 
-	if prevState != Idle {
+	if prevState == Idle {
 		return errors.New("cannot cancel idle flow")
 	}
 
