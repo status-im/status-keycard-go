@@ -158,6 +158,10 @@ func (f *KeycardFlow) openSC(kc *keycardContext, giveup bool) error {
 }
 
 func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
+	if f.cardInfo.pukRetries == 0 {
+		return f.pauseAndRestart(SwapCard, PUKRetries)
+	}
+
 	pukError := ""
 	var err error
 
@@ -185,6 +189,10 @@ func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
 		pukError = PUK
 	}
 
+	if f.cardInfo.pukRetries == 0 {
+		return f.pauseAndRestart(SwapCard, PUKRetries)
+	}
+
 	if !pukOK {
 		err = f.pauseAndWait(EnterPUK, pukError)
 	} else if !pinOK {
@@ -199,9 +207,7 @@ func (f *KeycardFlow) unblockPIN(kc *keycardContext) error {
 }
 
 func (f *KeycardFlow) authenticate(kc *keycardContext) error {
-	if f.cardInfo.pukRetries == 0 {
-		return f.pauseAndRestart(SwapCard, PUKRetries)
-	} else if f.cardInfo.pinRetries == 0 {
+	if f.cardInfo.pinRetries == 0 {
 		// succesful unblock leaves the card authenticated
 		return f.unblockPIN(kc)
 	}
