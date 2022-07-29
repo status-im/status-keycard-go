@@ -224,6 +224,10 @@ func (f *KeycardFlow) authenticate(kc *keycardContext) error {
 		pinError = PIN
 	}
 
+	if f.cardInfo.pinRetries == 0 {
+		return f.unblockPIN(kc)
+	}
+
 	err := f.pauseAndWait(EnterPIN, pinError)
 
 	if err != nil {
