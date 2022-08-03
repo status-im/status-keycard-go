@@ -501,3 +501,35 @@ func (kc *keycardContext) factoryReset() error {
 
 	return nil
 }
+
+func (kc *keycardContext) storeMetadata(metadata *types.Metadata) error {
+	<-kc.connected
+	if kc.runErr != nil {
+		return kc.runErr
+	}
+
+	err := kc.cmdSet.StoreData(keycard.P1StoreDataPublic, metadata.Serialize())
+
+	if err != nil {
+		l("storeMetadata failed %+v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) getMetadata() (*types.Metadata, error) {
+	<-kc.connected
+	if kc.runErr != nil {
+		return nil, kc.runErr
+	}
+
+	data, err := kc.cmdSet.GetData(keycard.P1StoreDataPublic)
+
+	if err != nil {
+		l("getMetadata failed %+v", err)
+		return nil, err
+	}
+
+	return types.ParseMetadata(data)
+}
