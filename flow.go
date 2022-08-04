@@ -542,14 +542,14 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 			return nil, err
 		}
 
-		for _, p := range m.Wallets {
-			k, err := f.exportKey(kc, p.Path, true)
+		for i := range m.Wallets {
+			k, err := f.exportKey(kc, m.Wallets[i].Path, true)
 
 			if err != nil {
 				return nil, err
 			}
 
-			p.Address = k.Address
+			m.Wallets[i].Address = k.Address
 		}
 	}
 
