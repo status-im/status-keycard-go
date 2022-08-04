@@ -6,6 +6,7 @@ import (
 
 	"github.com/ebfe/scard"
 	keycard "github.com/status-im/keycard-go"
+	"github.com/status-im/keycard-go/derivationpath"
 	ktypes "github.com/status-im/keycard-go/types"
 )
 
@@ -64,5 +65,23 @@ func toSignature(r *ktypes.Signature) *Signature {
 		R: r.R(),
 		S: r.S(),
 		V: r.V(),
+	}
+}
+
+func toMetadata(r *ktypes.Metadata) *Metadata {
+	paths := r.Paths()
+	wallets := make([]Wallet, len(paths))
+
+	tmp := []uint32{0x8000002c, 0x8000003c, 0x80000000, 0x00000000, 0x00000000}
+
+	for i, p := range paths {
+		tmp[4] = p
+		path := derivationpath.Encode(tmp)
+		wallets[i].Path = path
+	}
+
+	return &Metadata{
+		Name:    r.Name(),
+		Wallets: wallets,
 	}
 }

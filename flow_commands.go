@@ -1,5 +1,13 @@
 package statuskeycardgo
 
+import (
+	"errors"
+	"strings"
+
+	"github.com/status-im/keycard-go/derivationpath"
+	ktypes "github.com/status-im/keycard-go/types"
+)
+
 func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
 	err := kc.factoryReset()
 
@@ -275,6 +283,71 @@ func (f *KeycardFlow) unpair(kc *keycardContext, idx int) error {
 
 func (f *KeycardFlow) removeKey(kc *keycardContext) error {
 	err := kc.removeKey()
+
+	if isSCardError(err) {
+		return restartErr()
+	}
+
+	return err
+}
+
+func (f *KeycardFlow) getMetadata(kc *keycardContext) (*Metadata, error) {
+	m, err := kc.getMetadata()
+
+	if isSCardError(err) {
+		return nil, restartErr()
+	} else if err != nil {
+		return nil, err
+	}
+
+	return toMetadata(m), nil
+}
+
+func (f *KeycardFlow) storeMetadata(kc *keycardContext) error {
+	cardName, cardNameOK := f.params[CardName]
+
+	if !cardNameOK {
+		err := f.pauseAndWait(EnterName, ErrorStoreMeta)
+		if err != nil {
+			return err
+		}
+
+		return f.storeMetadata(kc)
+	}
+
+	w, walletsOK := f.params[WalletPaths]
+
+	if !walletsOK {
+		err := f.pauseAndWait(EnterWallets, ErrorStoreMeta)
+		if err != nil {
+			return err
+		}
+
+		return f.storeMetadata(kc)
+	}
+
+	wallets := w.([]string)
+
+	paths := make([]uint32, len(wallets))
+	for i, p := range wallets {
+		if !strings.HasPrefix(p, walletRoothPath) {
+			return errors.New("path must start with " + walletRoothPath)
+		}
+
+		_, components, err := derivationpath.Decode(p)
+		if err != nil {
+			return err
+		}
+
+		paths[i] = components[len(components)-1]
+	}
+
+	m, err := ktypes.NewMetadata(cardName.(string), paths)
+	if err != nil {
+		return err
+	}
+
+	err = kc.storeMetadata(m)
 
 	if isSCardError(err) {
 		return restartErr()

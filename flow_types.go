@@ -37,6 +37,8 @@ const (
 	UnpairThis
 	UnpairOthers
 	DeleteAccountAndUnpair
+	StoreMetadata
+	GetMetadata
 )
 
 const (
@@ -61,6 +63,8 @@ const (
 	EnterTXHash   = "keycard.action.enter-tx-hash"
 	EnterPath     = "keycard.action.enter-bip44-path"
 	EnterMnemonic = "keycard.action.enter-mnemonic"
+	EnterName     = "keycard.action.enter-cardname"
+	EnterWallets  = "keycard.action.enter-wallets"
 )
 
 const (
@@ -79,6 +83,7 @@ const (
 	ErrorExporting   = "exporting"
 	ErrorChanging    = "changing-credentials"
 	ErrorLoading     = "loading-keys"
+	ErrorStoreMeta   = "storing-metadata"
 )
 
 const (
@@ -111,6 +116,10 @@ const (
 	BIP44Path    = "bip44-path"
 	TXSignature  = "tx-signature"
 	Overwrite    = "overwrite"
+	ResolveAddr  = "resolve-addresses"
+	CardMeta     = "card-metadata"
+	CardName     = "card-name"
+	WalletPaths  = "wallet-paths"
 )
 
 const (

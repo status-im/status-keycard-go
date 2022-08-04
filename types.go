@@ -54,3 +54,13 @@ type KeyPair struct {
 	PublicKey  hexString `json:"publicKey"`
 	PrivateKey hexString `json:"privateKey,omitempty"`
 }
+
+type Wallet struct {
+	Path    string `json:"path"`
+	Address string `json:"address,omitempty"`
+}
+
+type Metadata struct {
+	Name    string   `json:"name"`
+	Wallets []Wallet `json:"wallets"`
+}

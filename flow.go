@@ -250,6 +250,10 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 		return f.unpairOthersFlow(kc)
 	case DeleteAccountAndUnpair:
 		return f.deleteUnpairFlow(kc)
+	case StoreMetadata:
+		return f.storeMetadataFlow(kc)
+	case GetMetadata:
+		return f.getMetadataFlow(kc)
 	default:
 		return nil, errors.New(ErrorUnknownFlow)
 	}
@@ -506,4 +510,48 @@ func (f *KeycardFlow) deleteUnpairFlow(kc *keycardContext) (FlowStatus, error) {
 	f.cardInfo.freeSlots++
 
 	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID, FreeSlots: f.cardInfo.freeSlots}, nil
+}
+
+func (f *KeycardFlow) storeMetadataFlow(kc *keycardContext) (FlowStatus, error) {
+	err := f.openSCAndAuthenticate(kc, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.storeMetadata(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
+}
+
+func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
+	m, err := f.getMetadata(kc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resolveAddr, ok := f.params[ResolveAddr]; ok && resolveAddr.(bool) {
+		err := f.openSCAndAuthenticate(kc, false)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, p := range m.Wallets {
+			k, err := f.exportKey(kc, p.Path, true)
+
+			if err != nil {
+				return nil, err
+			}
+
+			p.Address = k.Address
+		}
+	}
+
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, CardMeta: m}, nil
 }
