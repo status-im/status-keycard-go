@@ -14,6 +14,8 @@ func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
 	if err == nil {
 		delete(f.params, FactoryReset)
 		return restartErr()
+	} else if isSCardError(err) {
+		return restartErr()
 	} else {
 		return err
 	}
@@ -22,13 +24,13 @@ func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
 func (f *KeycardFlow) selectKeycard(kc *keycardContext) error {
 	appInfo, err := kc.selectApplet()
 
-	f.cardInfo.instanceUID = btox(appInfo.InstanceUID)
-	f.cardInfo.keyUID = btox(appInfo.KeyUID)
-	f.cardInfo.freeSlots = bytesToInt(appInfo.AvailableSlots)
-
 	if err != nil {
 		return restartErr()
 	}
+
+	f.cardInfo.instanceUID = btox(appInfo.InstanceUID)
+	f.cardInfo.keyUID = btox(appInfo.KeyUID)
+	f.cardInfo.freeSlots = bytesToInt(appInfo.AvailableSlots)
 
 	if !appInfo.Installed {
 		return f.pauseAndRestart(SwapCard, ErrorNotAKeycard)
@@ -108,7 +110,9 @@ func (f *KeycardFlow) initCard(kc *keycardContext) error {
 
 	err := kc.init(newPIN.(string), newPUK.(string), newPairing.(string))
 
-	if err != nil {
+	if isSCardError(err) {
+		return restartErr()
+	} else if err != nil {
 		return err
 	}
 
