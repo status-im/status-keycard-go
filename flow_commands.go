@@ -2,8 +2,10 @@ package statuskeycardgo
 
 import (
 	"errors"
+	"io"
 	"strings"
 
+	"github.com/status-im/keycard-go/apdu"
 	"github.com/status-im/keycard-go/derivationpath"
 	ktypes "github.com/status-im/keycard-go/types"
 )
@@ -298,13 +300,21 @@ func (f *KeycardFlow) removeKey(kc *keycardContext) error {
 func (f *KeycardFlow) getMetadata(kc *keycardContext) (*Metadata, error) {
 	m, err := kc.getMetadata()
 
-	if isSCardError(err) {
+	if err == nil {
+		return toMetadata(m), nil
+	} else if isSCardError(err) {
 		return nil, restartErr()
-	} else if err != nil {
+	} else if serr, ok := err.(*apdu.ErrBadResponse); ok {
+		if serr.Sw == 0x6d00 {
+			return nil, errors.New(ErrorNoKeys)
+		} else {
+			return nil, err
+		}
+	} else if err == io.EOF {
+		return nil, errors.New(ErrorNoData)
+	} else {
 		return nil, err
 	}
-
-	return toMetadata(m), nil
 }
 
 func (f *KeycardFlow) storeMetadata(kc *keycardContext) error {

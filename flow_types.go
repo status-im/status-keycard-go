@@ -84,6 +84,7 @@ const (
 	ErrorChanging    = "changing-credentials"
 	ErrorLoading     = "loading-keys"
 	ErrorStoreMeta   = "storing-metadata"
+	ErrorNoData      = "no-data"
 )
 
 const (
