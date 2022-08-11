@@ -208,7 +208,7 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 	defer f.closeKeycard(kc)
 
 	if kc == nil {
-		return nil, errors.New(ErrorConnection)
+		return nil, f.pauseAndRestart(InsertCard, ErrorConnection)
 	}
 
 	if factoryReset, ok := f.params[FactoryReset]; ok && factoryReset.(bool) {
