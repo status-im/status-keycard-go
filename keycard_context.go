@@ -57,7 +57,7 @@ func (kc *keycardContext) start() error {
 		err = newKeycardError("cannot get readers")
 		l(err.Error())
 		close(kc.connected)
-		_ = kc.cardCtx.Release()
+		_ = cardCtx.Release()
 		return err
 	}
 
@@ -68,7 +68,7 @@ func (kc *keycardContext) start() error {
 		err = newKeycardError("no smartcard reader found")
 		l(err.Error())
 		close(kc.connected)
-		_ = kc.cardCtx.Release()
+		_ = cardCtx.Release()
 		return err
 	}
 
