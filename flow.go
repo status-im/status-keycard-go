@@ -179,11 +179,11 @@ func (f *KeycardFlow) closeKeycard(kc *keycardContext) {
 	}
 }
 
-func (f *KeycardFlow) connect() *keycardContext {
+func (f *KeycardFlow) connect() (*keycardContext, error) {
 	kc, err := startKeycardContext()
 
 	if err != nil {
-		return nil
+		return nil, restartErr()
 	}
 
 	f.pause(InsertCard, ErrorConnection, FlowParams{})
@@ -192,23 +192,24 @@ func (f *KeycardFlow) connect() *keycardContext {
 		if f.state != Cancelling {
 			panic("Resuming is not expected during connection")
 		}
-		return nil
+		return nil, giveupErr()
 	case <-kc.connected:
 		if kc.runErr != nil {
-			return nil
+			return nil, restartErr()
 		}
 
+		f.state = Running
 		signal.Send(CardInserted, FlowStatus{})
-		return kc
+		return kc, nil
 	}
 }
 
 func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
-	kc := f.connect()
+	kc, err := f.connect()
 	defer f.closeKeycard(kc)
 
-	if kc == nil {
-		return nil, f.pauseAndRestart(InsertCard, ErrorConnection)
+	if err != nil {
+		return nil, err
 	}
 
 	if factoryReset, ok := f.params[FactoryReset]; ok && factoryReset.(bool) {
@@ -219,7 +220,7 @@ func (f *KeycardFlow) connectedFlow() (FlowStatus, error) {
 		}
 	}
 
-	err := f.selectKeycard(kc)
+	err = f.selectKeycard(kc)
 
 	if err != nil {
 		return nil, err

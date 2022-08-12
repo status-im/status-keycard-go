@@ -11,7 +11,7 @@ import (
 )
 
 func (f *KeycardFlow) factoryReset(kc *keycardContext) error {
-	err := kc.factoryReset()
+	err := kc.factoryReset(true)
 
 	if err == nil {
 		delete(f.params, FactoryReset)

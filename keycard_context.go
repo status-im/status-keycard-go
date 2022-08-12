@@ -57,6 +57,7 @@ func (kc *keycardContext) start() error {
 		err = newKeycardError("cannot get readers")
 		l(err.Error())
 		close(kc.connected)
+		_ = kc.cardCtx.Release()
 		return err
 	}
 
@@ -67,6 +68,7 @@ func (kc *keycardContext) start() error {
 		err = newKeycardError("no smartcard reader found")
 		l(err.Error())
 		close(kc.connected)
+		_ = kc.cardCtx.Release()
 		return err
 	}
 
@@ -95,6 +97,7 @@ func (kc *keycardContext) run() {
 		l(err.Error())
 		kc.runErr = err
 		close(kc.connected)
+		_ = kc.cardCtx.Release()
 		return
 	}
 
@@ -106,8 +109,10 @@ func (kc *keycardContext) run() {
 	card, err := kc.cardCtx.Connect(reader, scard.ShareShared, scard.ProtocolAny)
 	if err != nil {
 		// error connecting to card
+		l(err.Error())
 		kc.runErr = err
 		close(kc.connected)
+		_ = kc.cardCtx.Release()
 		return
 	}
 
@@ -115,6 +120,7 @@ func (kc *keycardContext) run() {
 	if err != nil {
 		kc.runErr = err
 		close(kc.connected)
+		_ = kc.cardCtx.Release()
 		return
 	}
 
@@ -465,7 +471,7 @@ func (kc *keycardContext) changePairingPassword(pairingPassword string) error {
 	return nil
 }
 
-func (kc *keycardContext) factoryReset() error {
+func (kc *keycardContext) factoryReset(retry bool) error {
 	<-kc.connected
 	if kc.runErr != nil {
 		return kc.runErr
@@ -491,7 +497,12 @@ func (kc *keycardContext) factoryReset() error {
 
 	if err := cmdSet.DeleteObject(aid); err != nil {
 		l("error deleting keycard aid %+v", err)
-		return err
+
+		if retry {
+			return kc.factoryReset(false)
+		} else {
+			return err
+		}
 	}
 
 	if err := cmdSet.InstallKeycardApplet(); err != nil {
