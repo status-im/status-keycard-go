@@ -183,7 +183,7 @@ func (f *KeycardFlow) connect() (*keycardContext, error) {
 	kc, err := startKeycardContext()
 
 	if err != nil {
-		return nil, restartErr()
+		return nil, errors.New(ErrorConnection)
 	}
 
 	f.pause(InsertCard, ErrorConnection, FlowParams{})
