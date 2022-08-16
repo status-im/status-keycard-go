@@ -3,6 +3,7 @@ package statuskeycardgo
 import (
 	"crypto/sha512"
 	"fmt"
+	"time"
 
 	"github.com/ebfe/scard"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -111,6 +112,7 @@ func (kc *keycardContext) run() {
 		// error connecting to card
 		l(err.Error())
 		kc.runErr = err
+		time.Sleep(500 * time.Millisecond)
 		close(kc.connected)
 		_ = kc.cardCtx.Release()
 		return
@@ -118,7 +120,9 @@ func (kc *keycardContext) run() {
 
 	status, err := card.Status()
 	if err != nil {
+		l(err.Error())
 		kc.runErr = err
+		time.Sleep(500 * time.Millisecond)
 		close(kc.connected)
 		_ = kc.cardCtx.Release()
 		return
