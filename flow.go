@@ -514,7 +514,7 @@ func (f *KeycardFlow) deleteUnpairFlow(kc *keycardContext) (FlowStatus, error) {
 }
 
 func (f *KeycardFlow) storeMetadataFlow(kc *keycardContext) (FlowStatus, error) {
-	err := f.openSCAndAuthenticate(kc, true)
+	err := f.openSCAndAuthenticate(kc, false)
 
 	if err != nil {
 		return nil, err
