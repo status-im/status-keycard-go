@@ -340,15 +340,15 @@ func (f *KeycardFlow) storeMetadata(kc *keycardContext) error {
 		return f.storeMetadata(kc)
 	}
 
-	wallets := w.([]string)
+	wallets := w.([]interface{})
 
 	paths := make([]uint32, len(wallets))
 	for i, p := range wallets {
-		if !strings.HasPrefix(p, walletRoothPath) {
+		if !strings.HasPrefix(p.(string), walletRoothPath) {
 			return errors.New("path must start with " + walletRoothPath)
 		}
 
-		_, components, err := derivationpath.Decode(p)
+		_, components, err := derivationpath.Decode(p.(string))
 		if err != nil {
 			return err
 		}
