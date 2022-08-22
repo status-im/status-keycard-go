@@ -537,6 +537,10 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 	}
 
 	if resolveAddr, ok := f.params[ResolveAddr]; ok && resolveAddr.(bool) {
+		if f.cardInfo.keyUID == "" {
+			return FlowStatus{ErrorKey: ErrorNoKeys, InstanceUID: f.cardInfo.instanceUID, CardMeta: m}, nil
+		}
+
 		err := f.openSCAndAuthenticate(kc, false)
 
 		if err != nil {
