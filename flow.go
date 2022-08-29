@@ -2,6 +2,7 @@ package statuskeycardgo
 
 import (
 	"errors"
+	"time"
 
 	"github.com/status-im/status-keycard-go/signal"
 )
@@ -186,21 +187,26 @@ func (f *KeycardFlow) connect() (*keycardContext, error) {
 		return nil, errors.New(ErrorConnection)
 	}
 
-	f.pause(InsertCard, ErrorConnection, FlowParams{})
-	select {
-	case <-f.wakeUp:
-		if f.state != Cancelling {
-			panic("Resuming is not expected during connection")
-		}
-		return nil, giveupErr()
-	case <-kc.connected:
-		if kc.runErr != nil {
-			return nil, restartErr()
-		}
+	t := time.NewTimer(150 * time.Millisecond)
 
-		f.state = Running
-		signal.Send(CardInserted, FlowStatus{})
-		return kc, nil
+	for {
+		select {
+		case <-f.wakeUp:
+			if f.state != Cancelling {
+				panic("Resuming is not expected during connection")
+			}
+			return nil, giveupErr()
+		case <-kc.connected:
+			if kc.runErr != nil {
+				return nil, restartErr()
+			}
+			t.Stop()
+			f.state = Running
+			signal.Send(CardInserted, FlowStatus{})
+			return kc, nil
+		case <-t.C:
+			f.pause(InsertCard, ErrorConnection, FlowParams{})
+		}
 	}
 }
 
