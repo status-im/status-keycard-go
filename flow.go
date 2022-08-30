@@ -201,8 +201,11 @@ func (f *KeycardFlow) connect() (*keycardContext, error) {
 				return nil, restartErr()
 			}
 			t.Stop()
-			f.state = Running
-			signal.Send(CardInserted, FlowStatus{})
+			if f.state == Paused {
+				f.state = Running
+				signal.Send(CardInserted, FlowStatus{})
+			}
+
 			return kc, nil
 		case <-t.C:
 			f.pause(InsertCard, ErrorConnection, FlowParams{})
