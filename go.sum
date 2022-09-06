@@ -329,6 +329,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/status-im/keycard-go v0.0.0-20190316090335-8537d3370df4/go.mod h1:RZLeN1LMWmRsyYjvAu+I6Dm9QmlDaIIt+Y+4Kd7Tp+Q=
 github.com/status-im/keycard-go v0.0.0-20220804094519-059bc140cef1 h1:65QWh3P3a6wlV2QN38/UzMpDbOzugjYuHSuog5D3810=
 github.com/status-im/keycard-go v0.0.0-20220804094519-059bc140cef1/go.mod h1:97vT0Rym0wCnK4B++hNA3nCetr0Mh1KXaVxzSt1arjg=
+github.com/status-im/keycard-go v0.0.0-20220906070205-e43cb0f06ae9 h1:MsY/aBTLUwGrZmoQP8pMkFLBgVG1EQjvMdvePwdUP5o=
+github.com/status-im/keycard-go v0.0.0-20220906070205-e43cb0f06ae9/go.mod h1:97vT0Rym0wCnK4B++hNA3nCetr0Mh1KXaVxzSt1arjg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.0/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
