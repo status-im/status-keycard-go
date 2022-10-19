@@ -371,7 +371,7 @@ func (f *KeycardFlow) storeMetadata(kc *keycardContext) error {
 }
 
 func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool) (*KeyPair, error) {
-	keyPair, err := kc.exportKey(true, false, onlyPublic, path)
+	keyPair, err := kc.exportKey(true, path == masterPath, onlyPublic, path)
 
 	if isSCardError(err) {
 		return nil, restartErr()
