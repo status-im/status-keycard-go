@@ -355,13 +355,26 @@ func (f *KeycardFlow) exportPublicFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
+	result := FlowStatus{KeyUID: f.cardInfo.keyUID}
+
+	if exportMaster, ok := f.params[ExportMaster]; ok && exportMaster.(bool) {
+		masterKey, err := f.exportKey(kc, masterPath, true)
+		result[MasterAddr] = masterKey.Address
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	key, err := f.exportBIP44Key(kc)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return FlowStatus{KeyUID: f.cardInfo.keyUID, ExportedKey: key}, nil
+	result[ExportedKey] = key
+
+	return result, nil
 }
 
 func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {

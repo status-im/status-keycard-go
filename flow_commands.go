@@ -382,7 +382,8 @@ func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool
 
 func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (*KeyPair, error) {
 	if path, ok := f.params[BIP44Path]; ok {
-		return f.exportKey(kc, path.(string), true)
+		exportPrivate, ok := f.params[ExportPriv]
+		return f.exportKey(kc, path.(string), (!ok || !exportPrivate.(bool)))
 	}
 
 	err := f.pauseAndWait(EnterPath, ErrorExporting)
