@@ -299,7 +299,7 @@ func (f *KeycardFlow) exportKeysFlow(kc *keycardContext, recover bool) (FlowStat
 		return nil, err
 	}
 
-	result := FlowStatus{KeyUID: f.cardInfo.keyUID}
+	result := FlowStatus{KeyUID: f.cardInfo.keyUID, InstanceUID: f.cardInfo.instanceUID}
 
 	key, err := f.exportKey(kc, encryptionPath, false)
 	if err != nil {
@@ -355,7 +355,7 @@ func (f *KeycardFlow) exportPublicFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	result := FlowStatus{KeyUID: f.cardInfo.keyUID}
+	result := FlowStatus{KeyUID: f.cardInfo.keyUID, InstanceUID: f.cardInfo.instanceUID}
 
 	if exportMaster, ok := f.params[ExportMaster]; ok && exportMaster.(bool) {
 		masterKey, err := f.exportKey(kc, masterPath, true)
@@ -396,7 +396,7 @@ func (f *KeycardFlow) loadKeysFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	return FlowStatus{KeyUID: f.cardInfo.keyUID}, nil
+	return FlowStatus{KeyUID: f.cardInfo.keyUID, InstanceUID: f.cardInfo.instanceUID}, nil
 }
 
 func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
@@ -418,7 +418,7 @@ func (f *KeycardFlow) signFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	return FlowStatus{KeyUID: f.cardInfo.keyUID, TXSignature: signature}, nil
+	return FlowStatus{KeyUID: f.cardInfo.keyUID, InstanceUID: f.cardInfo.instanceUID, TXSignature: signature}, nil
 }
 
 func (f *KeycardFlow) changePINFlow(kc *keycardContext) (FlowStatus, error) {
