@@ -101,7 +101,7 @@ func main() {
 	signal.SetKeycardSignalHandler(signalHandler)
 
 	testFlow(skg.GetAppInfo, skg.FlowParams{skg.FactoryReset: true})
-	testFlow(skg.LoadAccount, skg.FlowParams{skg.MnemonicLen: 12.0})
+	testFlow(skg.LoadAccount, skg.FlowParams{skg.MnemonicLen: 12})
 	testFlow(skg.UnpairThis, skg.FlowParams{skg.PIN: correctPIN})
 	testFlow(skg.RecoverAccount, skg.FlowParams{skg.PairingPass: "WrongPass", skg.PIN: "234567"})
 	testFlow(skg.Login, skg.FlowParams{skg.KeyUID: "60a78c98d5dd659f714eb7072bfb2c0d8a65f74a8f6aff7bb27cf56ae1feec17"})
