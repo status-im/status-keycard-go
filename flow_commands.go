@@ -409,12 +409,22 @@ func (f *KeycardFlow) loadKeys(kc *keycardContext) error {
 		return nil
 	}
 
-	mnemonicLength, ok := f.params[MnemonicLen]
-	if !ok {
+	tmpMnemonic, ok := f.params[MnemonicLen]
+	var mnemonicLength int
+	if ok {
+		switch t := tmpMnemonic.(type) {
+		case int:
+			mnemonicLength = t
+		case float64:
+			mnemonicLength = int(t)
+		default:
+			mnemonicLength = defMnemoLen
+		}
+	} else {
 		mnemonicLength = defMnemoLen
 	}
 
-	indexes, err := kc.generateMnemonic(mnemonicLength.(int) / 3)
+	indexes, err := kc.generateMnemonic(mnemonicLength / 3)
 
 	if isSCardError(err) {
 		return restartErr()
