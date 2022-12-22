@@ -108,6 +108,7 @@ func main() {
 	testFlow(skg.GetAppInfo, skg.FlowParams{})
 	testFlow(skg.ExportPublic, skg.FlowParams{skg.BIP44Path: "m/44'/60'/0'/0/1", skg.ExportMaster: true})
 	testFlow(skg.ExportPublic, skg.FlowParams{skg.BIP44Path: "m/43'/60'/1581'/1'/0", skg.ExportPriv: true})
+	testFlow(skg.ExportPublic, skg.FlowParams{skg.BIP44Path: []interface{}{"m/44'/60'/0'/0/2", "m/44'/60'/0'/0/3", "m/44'/60'/0'/0/4"}})
 	testFlow(skg.Sign, skg.FlowParams{skg.TXHash: "60a78c98d5dd659f714eb7072bfb2c0d8a65f74a8f6aff7bb27cf56ae1feec17", skg.BIP44Path: "m/44'/60'/0'/0/0"})
 	testFlow(skg.StoreMetadata, skg.FlowParams{skg.CardName: "TestCard", skg.WalletPaths: []interface{}{"m/44'/60'/0'/0/0", "m/44'/60'/0'/0/1", "m/44'/60'/0'/0/5", "m/44'/60'/0'/0/6"}})
 	testFlow(skg.GetMetadata, skg.FlowParams{})

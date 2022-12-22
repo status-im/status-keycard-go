@@ -380,10 +380,30 @@ func (f *KeycardFlow) exportKey(kc *keycardContext, path string, onlyPublic bool
 	return keyPair, err
 }
 
-func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (*KeyPair, error) {
+func (f *KeycardFlow) exportBIP44Key(kc *keycardContext) (interface{}, error) {
 	if path, ok := f.params[BIP44Path]; ok {
-		exportPrivate, ok := f.params[ExportPriv]
-		return f.exportKey(kc, path.(string), (!ok || !exportPrivate.(bool)))
+		exportPrivParam, ok := f.params[ExportPriv]
+		exportPrivate := (!ok || !exportPrivParam.(bool))
+
+		if pathStr, ok := path.(string); ok {
+			return f.exportKey(kc, pathStr, exportPrivate)
+		} else if paths, ok := path.([]interface{}); ok {
+			keys := make([]*KeyPair, len(paths))
+
+			for i, path := range paths {
+				key, err := f.exportKey(kc, path.(string), exportPrivate)
+				if err != nil {
+					return nil, err
+				}
+
+				keys[i] = key
+			}
+
+			return keys, nil
+		} else {
+			delete(f.params, BIP44Path)
+			return f.exportBIP44Key(kc)
+		}
 	}
 
 	err := f.pauseAndWait(EnterPath, ErrorExporting)
