@@ -434,7 +434,7 @@ func (f *KeycardFlow) changePINFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID}, nil
 }
 
 func (f *KeycardFlow) changePUKFlow(kc *keycardContext) (FlowStatus, error) {
@@ -450,7 +450,7 @@ func (f *KeycardFlow) changePUKFlow(kc *keycardContext) (FlowStatus, error) {
 		return nil, err
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID}, nil
 }
 
 func (f *KeycardFlow) changePairingFlow(kc *keycardContext) (FlowStatus, error) {
@@ -466,7 +466,7 @@ func (f *KeycardFlow) changePairingFlow(kc *keycardContext) (FlowStatus, error) 
 		return nil, err
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID}, nil
 }
 
 func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
@@ -483,7 +483,7 @@ func (f *KeycardFlow) unpairThisFlow(kc *keycardContext) (FlowStatus, error) {
 	}
 
 	f.cardInfo.freeSlots++
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID, FreeSlots: f.cardInfo.freeSlots}, nil
 }
 
 func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {
@@ -506,7 +506,7 @@ func (f *KeycardFlow) unpairOthersFlow(kc *keycardContext) (FlowStatus, error) {
 
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, FreeSlots: f.cardInfo.freeSlots}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID, FreeSlots: f.cardInfo.freeSlots}, nil
 }
 
 func (f *KeycardFlow) deleteUnpairFlow(kc *keycardContext) (FlowStatus, error) {
@@ -548,7 +548,7 @@ func (f *KeycardFlow) storeMetadataFlow(kc *keycardContext) (FlowStatus, error) 
 		return nil, err
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID}, nil
+	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID}, nil
 }
 
 func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
@@ -557,6 +557,8 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	result := FlowStatus{InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID}
 
 	if resolveAddr, ok := f.params[ResolveAddr]; ok && resolveAddr.(bool) {
 		if f.cardInfo.keyUID == "" {
@@ -567,6 +569,15 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 
 		if err != nil {
 			return nil, err
+		}
+
+		if exportMaster, ok := f.params[ExportMaster]; ok && exportMaster.(bool) {
+			masterKey, err := f.exportKey(kc, masterPath, true)
+			result[MasterAddr] = masterKey.Address
+
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		for i := range m.Wallets {
@@ -580,5 +591,7 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 		}
 	}
 
-	return FlowStatus{InstanceUID: f.cardInfo.instanceUID, CardMeta: m}, nil
+	result[CardMeta] = m
+
+	return result, nil
 }
