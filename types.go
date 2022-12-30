@@ -56,8 +56,9 @@ type KeyPair struct {
 }
 
 type Wallet struct {
-	Path    string `json:"path"`
-	Address string `json:"address,omitempty"`
+	Path      string    `json:"path"`
+	Address   string    `json:"address,omitempty"`
+	PublicKey hexString `json:"publicKey"`
 }
 
 type Metadata struct {

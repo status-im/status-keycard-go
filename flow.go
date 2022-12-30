@@ -588,6 +588,7 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 			}
 
 			m.Wallets[i].Address = k.Address
+			m.Wallets[i].PublicKey = k.PublicKey
 		}
 	}
 
