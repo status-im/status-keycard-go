@@ -188,7 +188,7 @@ func (f *KeycardFlow) connect() (*keycardContext, error) {
 	kc, err := startKeycardContext()
 
 	if err != nil {
-		return nil, errors.New(ErrorConnection)
+		return nil, err
 	}
 
 	t := time.NewTimer(150 * time.Millisecond)

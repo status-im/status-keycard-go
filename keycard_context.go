@@ -2,7 +2,7 @@ package statuskeycardgo
 
 import (
 	"crypto/sha512"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/ebfe/scard"
@@ -46,7 +46,7 @@ func startKeycardContext() (*keycardContext, error) {
 func (kc *keycardContext) start() error {
 	cardCtx, err := scard.EstablishContext()
 	if err != nil {
-		err = newKeycardError("no pcsc service")
+		err = errors.New(ErrorPCSC)
 		l(err.Error())
 		close(kc.connected)
 		return err
@@ -55,7 +55,7 @@ func (kc *keycardContext) start() error {
 	l("listing readers")
 	readers, err := cardCtx.ListReaders()
 	if err != nil {
-		err = newKeycardError("cannot get readers")
+		err = errors.New(ErrorReaderList)
 		l(err.Error())
 		close(kc.connected)
 		_ = cardCtx.Release()
@@ -65,8 +65,7 @@ func (kc *keycardContext) start() error {
 	kc.readers = readers
 
 	if len(readers) == 0 {
-		l("no smartcard reader found")
-		err = newKeycardError("no smartcard reader found")
+		err = errors.New(ErrorNoReader)
 		l(err.Error())
 		close(kc.connected)
 		_ = cardCtx.Release()
@@ -83,7 +82,7 @@ func (kc *keycardContext) stop() error {
 	}
 
 	if err := kc.cardCtx.Release(); err != nil {
-		err = newKeycardError(fmt.Sprintf("error releasing card context %v", err))
+		err = errors.New(ErrorConnection)
 		l(err.Error())
 		return err
 	}
@@ -262,7 +261,7 @@ func (kc *keycardContext) generateKey() ([]byte, error) {
 
 	if appStatus.KeyInitialized {
 		l("generateKey failed - already generated - %+v", err)
-		return nil, newKeycardError("key already generated")
+		return nil, errors.New("key already generated")
 	}
 
 	keyUID, err := kc.cmdSet.GenerateKey()
