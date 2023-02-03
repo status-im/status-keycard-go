@@ -93,6 +93,10 @@ func (f *KeycardFlow) runFlow() {
 		if _, ok := err.(*restartError); !ok {
 			if result == nil {
 				result = FlowStatus{ErrorKey: err.Error()}
+				if f.cardInfo.freeSlots != -1 {
+					result[InstanceUID] = f.cardInfo.instanceUID
+					result[KeyUID] = f.cardInfo.keyUID
+				}
 			}
 			break
 		}
@@ -562,7 +566,7 @@ func (f *KeycardFlow) getMetadataFlow(kc *keycardContext) (FlowStatus, error) {
 
 	if resolveAddr, ok := f.params[ResolveAddr]; ok && resolveAddr.(bool) {
 		if f.cardInfo.keyUID == "" {
-			return FlowStatus{ErrorKey: ErrorNoKeys, InstanceUID: f.cardInfo.instanceUID, CardMeta: m}, nil
+			return FlowStatus{ErrorKey: ErrorNoKeys, InstanceUID: f.cardInfo.instanceUID, KeyUID: f.cardInfo.keyUID, CardMeta: m}, nil
 		}
 
 		err := f.openSCAndAuthenticate(kc, false)
