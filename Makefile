@@ -12,7 +12,8 @@ ifeq ($(detected_OS),Darwin)
  LIB_EXT := dylib
  ifeq ("$(shell sysctl -nq hw.optional.arm64)","1")
   # Building on M1 is still not supported, so in the meantime we crosscompile to amd64
-  CGOFLAGS=CGO_ENABLED=1 GOOS=darwin GOARCH=amd64
+  FORCE_ARCH ?= amd64
+  CGOFLAGS=CGO_ENABLED=1 GOOS=darwin GOARCH=$(FORCE_ARCH)
  endif
 else ifeq ($(detected_OS),Windows)
  LIB_EXT:= dll
