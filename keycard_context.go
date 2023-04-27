@@ -177,7 +177,7 @@ func (kc *keycardContext) connect() error {
 	}
 
 	kc.card = card
-	kc.c = io.NewNormalChannel(card)
+	kc.c = io.NewNormalChannel(kc)
 	kc.cmdSet = keycard.NewCommandSet(kc.c)
 
 	return nil
