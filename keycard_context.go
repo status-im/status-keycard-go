@@ -212,6 +212,7 @@ func (kc *keycardContext) selectApplet() (*types.ApplicationInfo, error) {
 	if err != nil {
 		if e, ok := err.(*apdu.ErrBadResponse); ok && e.Sw == globalplatform.SwFileNotFound {
 			err = nil
+			kc.cmdSet.ApplicationInfo = &types.ApplicationInfo{}
 		} else {
 			l("select failed %+v", err)
 			return nil, err
@@ -425,7 +426,7 @@ func (kc *keycardContext) changePairingPassword(pairingPassword string) error {
 	return nil
 }
 
-func (kc *keycardContext) factoryReset(retry bool) error {
+func (kc *keycardContext) factoryResetFallback(retry bool) error {
 	cmdSet := globalplatform.NewCommandSet(kc.c)
 
 	if err := cmdSet.Select(); err != nil {
@@ -457,6 +458,22 @@ func (kc *keycardContext) factoryReset(retry bool) error {
 	if err := cmdSet.InstallKeycardApplet(); err != nil {
 		l("error installing Keycard applet %+v", err)
 		return err
+	}
+
+	return nil
+}
+
+func (kc *keycardContext) factoryReset(retry bool) error {
+	appInfo, err := kc.selectApplet()
+
+	if err != nil || !appInfo.HasFactoryResetCapability() {
+		return kc.factoryResetFallback(retry)
+	}
+
+	err = kc.cmdSet.FactoryReset()
+
+	if err != nil {
+		return kc.factoryResetFallback(retry)
 	}
 
 	return nil
