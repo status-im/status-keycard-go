@@ -111,6 +111,8 @@ const (
 	maxPUKRetries = 5
 	maxFreeSlots  = 5
 	defMnemoLen   = 12
+	defPINLen     = 6
+	defPUKLen     = 12
 )
 
 const (
