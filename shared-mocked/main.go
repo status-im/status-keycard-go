@@ -6,7 +6,6 @@ import "C"
 
 import (
 	"encoding/json"
-	"errors"
 	"unsafe"
 
 	skg "github.com/status-im/status-keycard-go"
@@ -15,9 +14,7 @@ import (
 
 func main() {}
 
-var notAvailable = errors.New("not available in this context")
-
-var globalFlow *skg.KeycardFlow
+var globalFlow *skg.MockedKeycardFlow
 
 func retErr(err error) *C.char {
 	if err == nil {
@@ -37,10 +34,25 @@ func jsonToParams(jsonParams *C.char) (skg.FlowParams, error) {
 	return params, nil
 }
 
+func jsonToMockedKeycard(jsonKeycard *C.char) (*skg.MockedKeycard, error) {
+	bytes := []byte(C.GoString(jsonKeycard))
+	if len(bytes) == 0 {
+		return nil, nil
+	}
+
+	mockedKeycard := &skg.MockedKeycard{}
+	if err := json.Unmarshal(bytes, mockedKeycard); err != nil {
+		return nil, err
+	}
+
+	return mockedKeycard, nil
+}
+
 //export KeycardInitFlow
 func KeycardInitFlow(storageDir *C.char) *C.char {
 	var err error
-	globalFlow, err = skg.NewFlow(C.GoString(storageDir))
+
+	globalFlow, err = skg.NewMockedFlow(C.GoString(storageDir))
 
 	return retErr(err)
 }
@@ -87,25 +99,41 @@ func KeycardSetSignalEventCallback(cb unsafe.Pointer) {
 
 //export MockedLibRegisterKeycard
 func MockedLibRegisterKeycard(cardIndex C.int, readerState C.int, keycardState C.int, mockedKeycard *C.char, mockedKeycardHelper *C.char) *C.char {
-	return retErr(notAvailable)
+	mockedKeycardInst, err := jsonToMockedKeycard(mockedKeycard)
+	if err != nil {
+		return retErr(err)
+	}
+
+	mockedKeycardHelperInst, err := jsonToMockedKeycard(mockedKeycardHelper)
+	if err != nil {
+		return retErr(err)
+	}
+
+	err = globalFlow.RegisterKeycard(int(cardIndex), skg.MockedReaderState(readerState), skg.MockedKeycardState(keycardState),
+		mockedKeycardInst, mockedKeycardHelperInst)
+	return retErr(err)
 }
 
 //export MockedLibReaderPluggedIn
 func MockedLibReaderPluggedIn() *C.char {
-	return retErr(notAvailable)
+	err := globalFlow.ReaderPluggedIn()
+	return retErr(err)
 }
 
 //export MockedLibReaderUnplugged
 func MockedLibReaderUnplugged() *C.char {
-	return retErr(notAvailable)
+	err := globalFlow.ReaderUnplugged()
+	return retErr(err)
 }
 
 //export MockedLibKeycardInserted
 func MockedLibKeycardInserted(cardIndex C.int) *C.char {
-	return retErr(notAvailable)
+	err := globalFlow.KeycardInserted(int(cardIndex))
+	return retErr(err)
 }
 
 //export MockedLibKeycardRemoved
 func MockedLibKeycardRemoved() *C.char {
-	return retErr(notAvailable)
+	err := globalFlow.KeycardRemoved()
+	return retErr(err)
 }

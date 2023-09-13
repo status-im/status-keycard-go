@@ -26,6 +26,14 @@ build-lib:
 	@echo "Static library built:"
 	@ls -la $(BUILD_PATH)/libkeycard/*
 
+build-mocked-lib:
+	mkdir -p $(BUILD_PATH)/libkeycard
+	@echo "Building mocked static library..."
+	cd shared-mocked && \
+		$(CGOFLAGS) go build -buildmode=c-shared -o $(BUILD_PATH)/libkeycard/libkeycard.$(LIB_EXT) .
+	@echo "Static mocked library built:"
+	@ls -la $(BUILD_PATH)/libkeycard/*
+
 build-example-shared: build-lib
 	mkdir -p $(BUILD_PATH)
 	@echo "Building example-c..."
