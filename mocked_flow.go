@@ -178,12 +178,10 @@ func (mkf *MockedKeycardFlow) RegisterKeycard(cardIndex int, readerState MockedR
 	mkf.registeredKeycards[cardIndex] = newKeycard
 	mkf.registeredKeycardHelpers[cardIndex] = newKeycardHelper
 
-	if mkf.currentReaderState == KeycardInserted && cardIndex == 1 {
-		mkf.initialReaderState = readerState
-		mkf.currentReaderState = readerState
-		mkf.insertedKeycard = newKeycard
-		mkf.insertedKeycardHelper = newKeycardHelper
-	}
+	mkf.initialReaderState = readerState
+	mkf.currentReaderState = readerState
+	mkf.insertedKeycard = newKeycard
+	mkf.insertedKeycardHelper = newKeycardHelper
 
 	return mkf.storeRegisteredKeycards()
 }
