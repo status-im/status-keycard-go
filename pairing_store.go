@@ -3,7 +3,7 @@ package statuskeycardgo
 import (
 	"encoding/json"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type pairingStore struct {
@@ -17,7 +17,7 @@ func newPairingStore(storage string) (*pairingStore, error) {
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			parent := path.Dir(p.path)
+			parent := filepath.Dir(p.path)
 			err = os.MkdirAll(parent, 0750)
 
 			if err != nil {
