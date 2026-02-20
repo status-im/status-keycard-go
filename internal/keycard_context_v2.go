@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"github.com/status-im/keycard-go"
+	"github.com/status-im/keycard-go/apdu"
 	"github.com/status-im/keycard-go/derivationpath"
 	"github.com/status-im/keycard-go/io"
 	"github.com/status-im/keycard-go/types"
@@ -22,9 +23,11 @@ import (
 )
 
 const (
-	infiniteTimeout = -1
-	zeroTimeout     = 0
-	monitoringTick  = 500 * time.Millisecond
+	infiniteTimeout            = -1
+	zeroTimeout                = 0
+	monitoringTick             = 500 * time.Millisecond
+	verifyPINRetrySW    uint16 = 0x6F05
+	verifyPINRetryDelay        = 100 * time.Millisecond
 )
 
 var (
@@ -534,6 +537,11 @@ func (kc *KeycardContextV2) checkSCardError(err error, context string) error {
 	return err
 }
 
+func isBadResponseSW(err error, sw uint16) bool {
+	badResp, ok := err.(*apdu.ErrBadResponse)
+	return ok && badResp.Sw == sw
+}
+
 func (kc *KeycardContextV2) selectApplet() (*ApplicationInfoV2, error) {
 	kc.cmdSetMutex.Lock()
 	defer kc.cmdSetMutex.Unlock()
@@ -635,6 +643,11 @@ func (kc *KeycardContextV2) VerifyPIN(pin string) (err error, authorized bool) {
 	defer kc.cmdSetMutex.Unlock()
 
 	err = kc.cmdSet.VerifyPIN(pin)
+	if isBadResponseSW(err, verifyPINRetrySW) {
+		kc.logger.Warn("VerifyPIN got transient response, retrying once", zap.Uint16("sw", verifyPINRetrySW))
+		time.Sleep(verifyPINRetryDelay)
+		err = kc.cmdSet.VerifyPIN(pin)
+	}
 
 	if err == nil {
 		return nil, true
